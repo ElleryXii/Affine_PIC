@@ -1,0 +1,11 @@
+# local machine settings (change according to your system)
+
+DEPEND = g++
+CC = g++ -Wall
+RELEASE_FLAGS = -O3 -DNDEBUG
+DEBUG_FLAGS = -g
+LINK = g++
+LINK_LIBS = -lm
+LINK_LIBS_V = -lm
+#GL_FLAGS = -lm -lobjc -framework OpenGL -framework GLUT # for the Mac
+GL_FLAGS = -lm -lGL -lGLU -lglut # for linux
