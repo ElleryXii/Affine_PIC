@@ -19,7 +19,7 @@ struct Particles{
    int np; // number of particles
    std::vector<Vec2f> x, u; // positions and velocities
    /* TODO: add helper variables */
-   //std::vector<Vec2f> cx, cy; // c vectors stored, times h
+   std::vector<Vec2f> cx, cy; // c vectors stored, times h
 
    // transfer stuff
    Array2f sum;

@@ -17,8 +17,8 @@
 
 struct Grid{
    float gravity;
-   float lx, ly;
-   float h, overh;
+   float lx, ly; // width， height
+   float h, overh; //cell side length, 1/cell side length
 
    // active variables
    Array2f u, v; // staggered MAC grid of velocities
