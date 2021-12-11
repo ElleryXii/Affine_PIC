@@ -1,4 +1,8 @@
-obj/*
-obj_debug/*
-outpic/*
-*
+**/obj/*
+**/obj_debug/*
+out*/*
+.vscode/*
+.idea/*
+flip2d
+viewflip2d/viewflip2d
+viewpls3D/*
