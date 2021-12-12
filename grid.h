@@ -8,7 +8,8 @@
 #ifndef GRID_H
 #define GRID_H
 
-#include "array2.h"
+#include "array3.h"
+#include "array3.h"
 #include "util.h"
 
 #define AIRCELL 0
@@ -17,36 +18,39 @@
 
 struct Grid{
    float gravity;
-   float lx, ly; // width， height
+   float lx, ly, lz; // width，height, depth
    float h, overh; //cell side length, 1/cell side length
 
    // active variables
-   Array2f u, v; // staggered MAC grid of velocities
-   Array2f du, dv; // saved velocities and differences for particle update
-   Array2c marker; // identifies what sort of cell we have
-   Array2f phi; // decays away from water into air (used for extrapolating velocity)
-   Array2d pressure;
+   Array3f u, v, w; // staggered MAC grid of velocities
+   Array3f du, dv, dw; // saved velocities and differences for particle update
+   Array3c marker; // identifies what sort of cell we have
+   Array3f phi; // decays away from water into air (used for extrapolating velocity)
+   Array3d pressure;
    // stuff for the pressure solve
-   Array2x3f poisson;
-   Array2d preconditioner;
-   Array2d m;
-   Array2d r, z, s;
+   Array3x3f poisson;
+   Array3d preconditioner;
+   Array3d m;
+   Array3d r, z, s;
 
    Grid(void)
    {}
 
-   Grid(float gravity_, int cell_nx, int cell_ny, float lx_)
-   { init(gravity_, cell_nx, cell_ny, lx_); }
+   Grid(float gravity_, int cell_nx, int cell_ny, int cell_nz, float lx_)
+   { init(gravity_, cell_nx, cell_ny, cell_nz, lx_); }
 
-   void init(float gravity_, int cell_nx, int cell_ny, float lx_);
+   void init(float gravity_, int cell_nx, int cell_ny, int cell_nz, float lx_);
    float CFL(void);
    void save_velocities(void);
-   void add_gravity(float dt, bool centered, float cx, float cy);
+   void add_gravity(float dt, bool centered, float cx, float cy, float cz);
    void compute_distance_to_fluid(void);
    void extend_velocity(void);
    void apply_boundary_conditions(void);
    void make_incompressible(void);
    void get_velocity_update(void);
+
+   //TODO: unify bary functions
+
 
    void bary_x(float x, int &i, float &fx)
    {
@@ -92,17 +96,23 @@ struct Grid{
       pv=v.bilerp(i, j, fx, fy);
    }
 
+   //TODO
+   void trilerp_uvw(float px, float py, float pz, float &pu, float &pv, float &pw){
+
+   }
+
    private:
    void init_phi(void);
    void sweep_phi(void);
    void sweep_u(int i0, int i1, int j0, int j1);
    void sweep_v(int i0, int i1, int j0, int j1);
+   void sweep_w(int i0, int i1, int j0, int j1);
    void sweep_velocity(void);
    void find_divergence(void);
    void form_poisson(void);
    void form_preconditioner(void);
-   void apply_poisson(const Array2d &x, Array2d &y);
-   void apply_preconditioner(const Array2d &x, Array2d &y, Array2d &temp);
+   void apply_poisson(const Array3d &x, Array3d &y);
+   void apply_preconditioner(const Array3d &x, Array3d &y, Array3d &temp);
    void solve_pressure(int maxits, double tolerance);
    void add_gradient(void);
 };

@@ -15,27 +15,30 @@
 using namespace std;
 
 void Grid::
-init(float gravity_, int cell_nx, int cell_ny, float lx_)
+init(float gravity_, int cell_nx, int cell_ny, int cell_nz, float lx_)
 {
    gravity=gravity_;
    lx=lx_;
    ly=cell_ny*lx/cell_nx;
+   lz = cell_nz*lx/cell_nx;
    h=lx/cell_nx;
    overh=cell_nx/lx;
    // allocate all the grid variables
-   u.init(cell_nx+1, cell_ny);
-   v.init(cell_nx, cell_ny+1);
-   pressure.init(cell_nx, cell_ny);
-   marker.init(cell_nx, cell_ny);
-   phi.init(cell_nx, cell_ny);
-   du.init(cell_nx+1, cell_ny);
-   dv.init(cell_nx, cell_ny+1);
-   poisson.init(cell_nx, cell_ny);
-   preconditioner.init(cell_nx, cell_ny);
-   m.init(cell_nx, cell_ny);
-   r.init(cell_nx, cell_ny);
-   z.init(cell_nx, cell_ny);
-   s.init(cell_nx, cell_ny);
+   u.init(cell_nx+1, cell_ny, cell_nz);
+   v.init(cell_nx, cell_ny+1, cell_nz);
+   w.init(cell_nx, cell_ny, cell_nz+1);
+   pressure.init(cell_nx, cell_ny, cell_nz);
+   marker.init(cell_nx, cell_ny, cell_nz);
+   phi.init(cell_nx, cell_ny, cell_nz);
+   du.init(cell_nx+1, cell_ny, cell_nz);
+   dv.init(cell_nx, cell_ny+1, cell_nz);
+   dw.init(cell_nx, cell_ny, cell_nz+1)
+   poisson.init(cell_nx, cell_ny, cell_nz);
+   preconditioner.init(cell_nx, cell_ny, cell_nz);
+   m.init(cell_nx, cell_ny, cell_nz);
+   r.init(cell_nx, cell_ny, cell_nz);
+   z.init(cell_nx, cell_ny, cell_nz);
+   s.init(cell_nx, cell_ny, cell_ny);
 }
 
 float Grid::

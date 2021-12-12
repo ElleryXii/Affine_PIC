@@ -25,14 +25,14 @@ using namespace std;
 /* which example to run. This is used in initializing the water. */
 float fluidphi(Grid &grid, float x, float y)
 {
-   //return y-0.5*grid.ly; // no drop
+//   return y-0.5*grid.ly; // no drop
    //return min(sqrt(sqr(x-0.5*grid.lx)+sqr(y-0.625*grid.ly))-0.02*grid.ly, y-0.6*grid.ly); // tiny drop
-   //return min(sqrt(sqr(x-0.3333*grid.lx)+sqr(y-0.71*grid.ly))-0.3*grid.ly, y-0.2*grid.ly); // large drop
-   //return max(y-0.8*grid.ly, -sqrt(sqr(x-0.5*grid.lx)+sqr(y-0.2*grid.ly))+0.1*grid.lx); // bubble
+//   return min(sqrt(sqr(x-0.3333*grid.lx)+sqr(y-0.71*grid.ly))-0.3*grid.ly, y-0.2*grid.ly); // large drop
+//   return max(y-0.8*grid.ly, -sqrt(sqr(x-0.5*grid.lx)+sqr(y-0.2*grid.ly))+0.1*grid.lx); // bubble
    //return sqrt(sqr(x-0.5*grid.lx)+sqr(y-0.75*grid.ly))-0.15*grid.lx; // large drop without bottom
    return min(y-INIT_FLOOR_SIZE*grid.ly, sqrt(sqr(x-0.5*grid.lx)+sqr(y-0.7*grid.ly))-INIT_DROP_RADIUS*grid.lx); // medium drop
    //return 0.75*grid.lx-x; // vertical column
-   //return max( max(x-0.75*grid.lx, 0.25*grid.lx-x), max(y-0.75*grid.ly, 0.25*grid.ly-y)); // small box
+//   return max( max(x-0.75*grid.lx, 0.25*grid.lx-x), max(y-0.75*grid.ly, 0.25*grid.ly-y)); // small box
 }
 
 /* Helper function for initializing the water */
@@ -79,6 +79,7 @@ void init_water_drop(Grid &grid, Particles &particles, int na, int nb)
          }
       }
    }
+
 }
 
 void advance_one_step(Grid &grid, Particles &particles, double dt)
