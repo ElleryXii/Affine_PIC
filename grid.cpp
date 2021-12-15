@@ -322,45 +322,57 @@ find_divergence(void)
    }
 }
 
-//TODO
+//TODO: Implemented, untested; check # of direction; need to change poisson to Array3x4
 void Grid::
 form_poisson(void)
 {
    poisson.zero();
-   for(int j=1; j<poisson.ny-1; ++j) for(int i=1; i<poisson.nx-1; ++i){
-      if(marker(i,j)==FLUIDCELL){
-         if(marker(i-1,j)!=SOLIDCELL)
-            poisson(i,j,0)+=1;
-         if(marker(i+1,j)!=SOLIDCELL){
-            poisson(i,j,0)+=1;
-            if(marker(i+1,j)==FLUIDCELL)
-               poisson(i,j,1)=-1;
+   for(int k = 1; k<poisson.nz-1; ++k)for(int j=1; j<poisson.ny-1; ++j) for(int i=1; i<poisson.nx-1; ++i){
+      if(marker(i,j,k)==FLUIDCELL){
+
+         if(marker(i-1,j,k)!=SOLIDCELL)
+            poisson(i,j,k,0)+=1;
+         if(marker(i+1,j, k)!=SOLIDCELL){
+            poisson(i,j,k,0)+=1;
+            if(marker(i+1,j,k)==FLUIDCELL)
+               poisson(i,j,k,1)=-1;
          }
-         if(marker(i,j-1)!=SOLIDCELL)
-            poisson(i,j,0)+=1;
-         if(marker(i,j+1)!=SOLIDCELL){
-            poisson(i,j,0)+=1;
-            if(marker(i,j+1)==FLUIDCELL)
-               poisson(i,j,2)=-1;
+
+         if(marker(i,j-1,k)!=SOLIDCELL)
+            poisson(i,j,k,0)+=1;
+         if(marker(i,j+1,k)!=SOLIDCELL){
+            poisson(i,j,k,0)+=1;
+            if(marker(i,j+1,k)==FLUIDCELL)
+               poisson(i,j,k,2)=-1;
          }
+
+          if(marker(i,j,k-1)!=SOLIDCELL)
+              poisson(i,j,k,0)+=1;
+          if(marker(i,j,k+1)!=SOLIDCELL){
+              poisson(i,j,k,0)+=1;
+              if(marker(i,j,k+1)==FLUIDCELL)
+                  poisson(i,j,k,3)=-1;
+          }
       }
    }
 }
 
-//TODO
+//TODO: Implemented, untested
 void Grid::
-apply_poisson(const Array2d &x, Array2d &y)
+apply_poisson(const Array3d &x, Array3d &y)
 {
-   y.zero();
-   for(int j=1; j<poisson.ny-1; ++j) for(int i=1; i<poisson.nx-1; ++i){
-      if(marker(i,j)==FLUIDCELL){
-         y(i,j) = poisson(i,j,0)*x(i,j)
-                 + poisson(i-1,j,1)*x(i-1,j)
-                 + poisson(i,j,1)*x(i+1,j)
-                 + poisson(i,j-1,2)*x(i,j-1)
-                 + poisson(i,j,2)*x(i,j+1);
-      }
-   }
+    y.zero();
+    for (int k=1; k<poisson.nz-1; ++k) for(int j=1; j<poisson.ny-1; ++j) for(int i=1; i<poisson.nx-1; ++i){
+        if(marker(i,j,k)==FLUIDCELL){
+            y(i,j,k) = poisson(i,j,k,0) * x(i,j,k)
+                            + poisson(i-1,j,k,1) * x(i-1,j,k)
+                            + poisson(i,j,k,1) * x(i+1,j,k)
+                            + poisson(i,j-1,k,2) * x(i,j-1,k)
+                            + poisson(i,j,k,2) * x(i,j+1,k)
+                            + poisson(i,j,k-1,3) * x(i,j,k-1)
+                            + poisson(i,j,k,3) * x(i,j,k+1)
+        }
+    }
 }
 
 //TODO
