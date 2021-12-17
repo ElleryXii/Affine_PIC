@@ -194,49 +194,39 @@ init_phi(void)
    }
 }
 
-//TODO: distance
-static inline void solve_distance(float p, float q, float &r)
+//TODO - distance function
+static inline void solve_distance(float p, float q, float r, float &o)
 {
-   float d=fmin(p,q)+1;
-   if(d> fmax(p,q))
-      d=(p+q+sqrt(2-sqr(p-q)))/2;
-   if(d<r) r=d;
+   float d = min(p,q,r)+1;
+   if(d > max(p,q,r))
+      d=(p+q+r+sqrt(2-sqr(p-q)))/3.0;
+   if(d<o) o=d;
 }
 
-//TODO: add directions
+inline void Grid::
+sweep_phi(int i0, int i1, int j0, int j1, int k0, int k1)
+{
+    int di=(i0<i1) ? 1 : -1, dj=(j0<j1) ? 1 : -1, dk = (k0<k1)?1:-1;
+    for (int k=k0; k!=k1; k+=dk) for( int j=j0; j!=j1; j+=dj) for(int i=i0; i!=i1; i+=di)
+    {
+        if (marker(i,j,k)!=FLUIDCELL)
+            solve_distance(phi(i-di, j, k),phi(i, j-dj, k) , phi(i, j, k-dk),phi(i,j,k));
+    }
+}
+
+//TOTEST
 void Grid::
 sweep_phi(void)
 {
    // fast sweeping outside the fluid in all four sweep directions
-    int i, j;
-
-    for(j=1; j<phi.ny; ++j) for(i=1; i<phi.nx; ++i)
-        if(marker(i,j)!=FLUIDCELL)
-            solve_distance(phi(i-1,j), phi(i,j-1), phi(i,j));
-
-    for(j=phi.ny-2; j>=0; --j) for(i=1; i<phi.nx; ++i)
-        if(marker(i,j)!=FLUIDCELL)
-            solve_distance(phi(i-1,j), phi(i,j+1), phi(i,j));
-
-//---
-
-    for(j=1; j<phi.ny; ++j) for(i=phi.nx-2; i>=0; --i)
-        if(marker(i,j)!=FLUIDCELL)
-            solve_distance(phi(i+1,j), phi(i,j-1), phi(i,j));
-
-    for(j=phi.ny-2; j>=0; --j) for(i=phi.nx-2; i>=0; --i)
-        if(marker(i,j)!=FLUIDCELL)
-            solve_distance(phi(i+1,j), phi(i,j+1), phi(i,j));
-
-/*
-    for(j=1; j<phi.ny; ++j) for(i=phi.nx-2; i>=0; --i)
-        if(marker(i,j)!=FLUIDCELL)
-            solve_distance(phi(i+1,j), phi(i,j-1), phi(i,j));
-
-    for(j=phi.ny-2; j>=0; --j) for(i=phi.nx-2; i>=0; --i)
-        if(marker(i,j)!=FLUIDCELL)
-            solve_distance(phi(i+1,j), phi(i,j+1), phi(i,j));
-            */
+    sweep_phi(1, phi.nx, 1, phi.ny, 1, phi.nz);
+    sweep_phi(1, phi.nx, 1, phi.ny, phi.nz-2, -1);
+    sweep_phi(1, phi.nx, phi.ny-2, -1, 1, phi.nz);
+    sweep_phi(phi.nx-2, -1, 1, phi.ny, 1, phi.nz);
+    sweep_phi(1, phi.nx, phi.ny-2, -1,  phi.nz-2, -1);
+    sweep_phi(phi.nx-2, -1, 1, phi.ny, phi.nz-2, -1);
+    sweep_phi(phi.nx-2, -1, phi.ny-2, -1, 1, phi.nz);
+    sweep_phi(phi.nx-2, -1, phi.ny-2, -1, phi.nz-2, -1);
 }
 
 //TODO
@@ -273,7 +263,7 @@ sweep_v(int i0, int i1, int j0, int j1)
          v(i,j)=alpha*v(i-di,j)+(1-alpha)*v(i,j-dj);
       }
 }
-//TODO, consider combine the sweep functions
+//TODO, combine sweeping
 void Grid::
 sweep_w(int i0, int i1, int j0, int j1, int k0, int k1)
 {
