@@ -19,7 +19,7 @@ add_particle(const Vec2f &px, const Vec2f &pu)
 {
    x.push_back(px);
    u.push_back(pu);
-   /* TODO: initialize the variables you created in particles.h */
+   /* Done: initialize the variables you created in particles.h */
    cx.push_back(Vec2f(0.f,0.f));
    cy.push_back(Vec2f(0.f,0.f));
 
@@ -57,7 +57,7 @@ void Particles::
 affineFix(T &accum, Vec2f c, int i, int j, float fx, float fy)
 {
     float weight;
-   /* TODO: Affine fix */
+   /* Done: Affine fix */
     weight = (1-fx)*(1-fy);
     accum(i,j) +=  weight * (c[0] * fx + c[1] * fy);
 
@@ -83,7 +83,7 @@ transfer_to_grid(void)
       grid.bary_x(x[p][0], ui, ufx);
       grid.bary_y_centre(x[p][1], j, fy);
       accumulate(grid.u, u[p][0], ui, j, ufx, fy);
-      /* TODO: call affineFix to incorporate c_px^n into the grid.u update */
+      /* Done: call affineFix to incorporate c_px^n into the grid.u update */
       affineFix(grid.u, cx[p], ui, j, ufx, fy);
    }
    for(j=0; j<grid.u.ny; ++j) for(i=0; i<grid.u.nx; ++i){
@@ -96,7 +96,7 @@ transfer_to_grid(void)
       grid.bary_x_centre(x[p][0], i, fx);
       grid.bary_y(x[p][1], vj, vfy);
       accumulate(grid.v, u[p][1] , i, vj, fx, vfy);
-      /* TODO: call affineFix to incorporate c_py^n into the grid.v update */
+      /* Done: call affineFix to incorporate c_py^n into the grid.v update */
       affineFix(grid.v, cy[p], i, vj, fx, vfy);
    }
    for(j=0; j<grid.v.ny; ++j) for(i=0; i<grid.v.nx; ++i){
@@ -116,7 +116,7 @@ transfer_to_grid(void)
 Vec2f Particles::
 computeC(Array2f &ufield, int i, int j, float fx, float fy) //ufield: grid.u or grid.v
 {
-   /* TODO: Compute C  */
+   /* Done: Compute C  */
    Vec2f c = Vec2f(fy - 1.0, fx - 1.0) * ufield(i,j)
            + Vec2f(1.0 - fy, -fx) * ufield(i+1,j)
            + Vec2f(-fy, 1.0 - fx) * ufield(i,j+1)
@@ -145,7 +145,7 @@ update_from_grid(void)
 
          if( simType == APIC )
          {
-            /* TODO: call computeC with the right indices to compute c_px^n and c_py^n */
+            /* Done: call computeC with the right indices to compute c_px^n and c_py^n */
              cx[p] = computeC(grid.u, ui, j, ufx, fy);
              cy[p] = computeC(grid.v, i, vj, fx, vfy);
          }
