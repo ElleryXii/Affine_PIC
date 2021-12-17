@@ -72,7 +72,7 @@ add_gravity(float dt, bool centered, float cx, float cy)
          for( int j = 0; j < v.ny; ++j)
          {
             float x, y, dx, dy, dr2, dr;
-            if ( j < u.ny) 
+            if ( j < u.ny)
             {
                x = ( i ) * h;
                y = ( 0.5 + j ) * h;
@@ -263,6 +263,7 @@ sweep_v(int i0, int i1, int j0, int j1)
          v(i,j)=alpha*v(i-di,j)+(1-alpha)*v(i,j-dj);
       }
 }
+
 //TODO, combine sweeping
 void Grid::
 sweep_w(int i0, int i1, int j0, int j1, int k0, int k1)
@@ -277,7 +278,7 @@ sweep_w(int i0, int i1, int j0, int j1, int k0, int k1)
             dp=0.5*(phi(i,j-1)+phi(i,j)-phi(i-di,j-1)-phi(i-di,j));
             if(dp<0) continue; // not useful on this sweep direction
 
-            if (dr<0) continue;
+            if(dr<0) continue;
 
             if(dp+dq==0) alpha=0.5;
             else alpha=dp/(dp+dq);
@@ -285,46 +286,58 @@ sweep_w(int i0, int i1, int j0, int j1, int k0, int k1)
         }
 }
 
+
+//TOTEST
+static inline void sweep_velocity_boundary(Array3f& vfield)
+{
+    int i, j, k;
+
+    for (i=0; i<vfield.nx; ++i){
+        for (j = 0; j<vfield.ny; ++j){
+            vfield(i,j, 0) = vfield(i,j,1);
+            vfield(i,j, vfield.nz-1) = vfield(i,j,vfield.nz-2);
+        }
+    }
+
+    for (i=0; i<vfield.nx; ++i){
+        for (k=0; k<vfield.nz; ++k){
+            vfield(i,0,k) = vfield(i,1,k);
+            vfield(i,vfield.ny-1,k) = vfield(i,vfield.ny-2,k);
+        }
+    }
+
+    for (j=0;j<vfield.ny;++j){
+        for (k=0;k<vfield.nz;++k){
+            vfield(0,j,k) = vfield(1,j,k);
+            vfield(vfield.nx-1,j,k) = vfield(vfield.nx-2,j,k);
+        }
+    }
+}
+
 //TODO: add directions, add w, simplify?
 void Grid::
 sweep_velocity(void)
 {
-   int i, j, k;
-   // sweep u, only into the air
-   sweep_u(1, u.nx-1, 1, u.ny-1);
-   sweep_u(1, u.nx-1, u.ny-2, 0);
-   sweep_u(u.nx-2, 0, 1, u.ny-1);
-   sweep_u(u.nx-2, 0, u.ny-2, 0);
-   for(i=0; i<u.nx; ++i){
-      u(i,0)=u(i,1); u(i,u.ny-1)=u(i,u.ny-2);
-   }
-   for(j=0; j<u.ny; ++j){
-       u(0,j)=u(1,j); u(u.nx-1,j)=u(u.nx-2,j);
-   }
+    // sweep u, only into the air
+    sweep_u(1, u.nx-1, 1, u.ny-1);
+    sweep_u(1, u.nx-1, u.ny-2, 0);
+    sweep_u(u.nx-2, 0, 1, u.ny-1);
+    sweep_u(u.nx-2, 0, u.ny-2, 0);
+    sweep_velocity_boundary(u);
 
-   // now the same for v
-   sweep_v(1, v.nx-1, 1, v.ny-1);
-   sweep_v(1, v.nx-1, v.ny-2, 0);
-   sweep_v(v.nx-2, 0, 1, v.ny-1);
-   sweep_v(v.nx-2, 0, v.ny-2, 0);
-   for(i=0; i<v.nx; ++i){
-      v(i,0)=v(i,1); v(i,v.ny-1)=v(i,v.ny-2);
-   }
-   for(j=0; j<v.ny; ++j){
-      v(0,j)=v(1,j); v(v.nx-1,j)=v(v.nx-2,j);
-   }
+    // now the same for v
+    sweep_v(1, v.nx-1, 1, v.ny-1);
+    sweep_v(1, v.nx-1, v.ny-2, 0);
+    sweep_v(v.nx-2, 0, 1, v.ny-1);
+    sweep_v(v.nx-2, 0, v.ny-2, 0);
+    sweep_velocity_boundary(v);
 
-   // for w
+    // for w
     sweep_w(1, w.nx-1, 1, w.ny-1);
     sweep_w(1, w.nx-1, w.ny-2, 0);
     sweep_w(w.nx-2, 0, 1, w.ny-1);
     sweep_w(w.nx-2, 0, w.ny-2, 0);
-    for(i=0; i<w.nx; ++i){
-        w(i,0)=w(i,1); w(i,w.ny-1)=w(i,w.ny-2);
-    }
-    for(j=0; j<w.ny; ++j){
-        w(0,j)=w(1,j); w(w.nx-1,j)=w(w.nx-2,j);
-    }
+    sweep_velocity_boundary(w);
 }
 
 //TOTEST
