@@ -185,23 +185,21 @@ static inline void solve_distance(float p, float q, float &r)
    if(d<r) r=d;
 }
 
+inline void Grid::sweep_phi(int i0, int i1, int j0, int j1)
+{
+    int di=(i0<i1) ? 1 : -1, dj=(j0<j1) ? 1 : -1;
+    for(int j=j0; j!=j1; j+=dj) for(int i=i0; i!=i1; i+=di)
+            if(marker(i,j)!=FLUIDCELL)
+                solve_distance(phi(i-di,j), phi(i,j-dj), phi(i,j));
+}
+
 void Grid::
 sweep_phi(void)
 {
-   // fast sweeping outside the fluid in all four sweep directions
-   int i, j;
-   for(j=1; j<phi.ny; ++j) for(i=1; i<phi.nx; ++i)
-      if(marker(i,j)!=FLUIDCELL)
-         solve_distance(phi(i-1,j), phi(i,j-1), phi(i,j));
-   for(j=phi.ny-2; j>=0; --j) for(i=1; i<phi.nx; ++i)
-      if(marker(i,j)!=FLUIDCELL)
-         solve_distance(phi(i-1,j), phi(i,j+1), phi(i,j));
-   for(j=1; j<phi.ny; ++j) for(i=phi.nx-2; i>=0; --i)
-      if(marker(i,j)!=FLUIDCELL)
-         solve_distance(phi(i+1,j), phi(i,j-1), phi(i,j));
-   for(j=phi.ny-2; j>=0; --j) for(i=phi.nx-2; i>=0; --i)
-      if(marker(i,j)!=FLUIDCELL)
-         solve_distance(phi(i+1,j), phi(i,j+1), phi(i,j));
+    sweep_phi(1, phi.nx, 1, phi.ny);
+    sweep_phi(1, phi.nx, phi.ny-2, -1);
+    sweep_phi(phi.nx-2, -1, 1, phi.ny);
+    sweep_phi(phi.nx-2, -1, phi.ny-2, -1);
 }
 
 void Grid::
