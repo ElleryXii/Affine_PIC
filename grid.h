@@ -47,7 +47,6 @@ struct Grid{
    void apply_boundary_conditions(void);
    void make_incompressible(void);
    void get_velocity_update(void);
-   void sweep_velocity_boundary(Array2f& vfield);
    void bary_x(float x, int &i, float &fx)
    {
       float sx=x*overh;

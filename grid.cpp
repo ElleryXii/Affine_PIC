@@ -236,8 +236,7 @@ sweep_v(int i0, int i1, int j0, int j1)
       }
 }
 
-inline void Grid::
-sweep_velocity_boundary(Array2f& vfield)
+static inline void sweep_velocity_boundary(Array2f& vfield)
 {
     for(int i=0; i<vfield.nx; ++i){
         vfield(i,0)=vfield(i,1); vfield(i,vfield.ny-1)=vfield(i,vfield.ny-2);
@@ -247,37 +246,22 @@ sweep_velocity_boundary(Array2f& vfield)
     }
 }
 
-
-
 void Grid::
 sweep_velocity(void)
 {
-   int i, j;
-   // sweep u, only into the air
-   sweep_u(1, u.nx-1, 1, u.ny-1);
-   sweep_u(1, u.nx-1, u.ny-2, 0);
-   sweep_u(u.nx-2, 0, 1, u.ny-1);
-   sweep_u(u.nx-2, 0, u.ny-2, 0);
+    // sweep u, only into the air
+    sweep_u(1, u.nx-1, 1, u.ny-1);
+    sweep_u(1, u.nx-1, u.ny-2, 0);
+    sweep_u(u.nx-2, 0, 1, u.ny-1);
+    sweep_u(u.nx-2, 0, u.ny-2, 0);
     sweep_velocity_boundary(u);
-//   for(i=0; i<u.nx; ++i){
-//      u(i,0)=u(i,1); u(i,u.ny-1)=u(i,u.ny-2);
-//   }
-//   for(j=0; j<u.ny; ++j){
-//       u(0,j)=u(1,j); u(u.nx-1,j)=u(u.nx-2,j);
-//   }
-   // now the same for v
-   sweep_v(1, v.nx-1, 1, v.ny-1);
-   sweep_v(1, v.nx-1, v.ny-2, 0);
-   sweep_v(v.nx-2, 0, 1, v.ny-1);
-   sweep_v(v.nx-2, 0, v.ny-2, 0);
-    sweep_velocity_boundary(v);
 
-//   for(i=0; i<v.nx; ++i){
-//      v(i,0)=v(i,1); v(i,v.ny-1)=v(i,v.ny-2);
-//   }
-//   for(j=0; j<v.ny; ++j){
-//      v(0,j)=v(1,j); v(v.nx-1,j)=v(v.nx-2,j);
-//   }
+    // now the same for v
+    sweep_v(1, v.nx-1, 1, v.ny-1);
+    sweep_v(1, v.nx-1, v.ny-2, 0);
+    sweep_v(v.nx-2, 0, 1, v.ny-1);
+    sweep_v(v.nx-2, 0, v.ny-2, 0);
+    sweep_velocity_boundary(v);
 }
 
 void Grid::
