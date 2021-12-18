@@ -194,13 +194,21 @@ init_phi(void)
    }
 }
 
-//TODO - distance function
-static inline void solve_distance(float p, float q, float r, float &o)
+// 3D Eikonal equation
+// Reference: Fluid Simulation for Computer Graphics 2nd Edition by Robert Bridson, Chapter 4 level set geometry, figure 4.4
+//TOTEST
+static inline void solve_distance(float phi0, float phi1, float phi2, float &r)
 {
-   float d = min(p,q,r)+1;
-   if(d > max(p,q,r))
-      d=(p+q+r+sqrt(2-sqr(p-q)))/3.0;
-   if(d<o) o=d;
+    //sort, ph0<phi1<phi2
+    if (phi0 > phi1) std::swap(phi0,phi1);
+    if (phi1 > phi2) std::swap(phi1,phi2);
+    if (phi0 > phi1) std::swap(phi0,phi1);
+    float d = phi0+1;
+    if (d > phi1)
+        d = 0.5*(phi0+phi1+sqrt(2-sqr(phi1-phi0)));
+    if (d > phi2)
+        d = (phi0+phi1+phi2 + sqrt(max(0, sqr(phi0+phi1+phi2)-3*(sqr(phi0)+ sqr(phi1)+sqr(phi2)-1))))/3.0;
+    if(d<r) r=d;
 }
 
 inline void Grid::
@@ -419,8 +427,8 @@ form_preconditioner()
                 - sqr( poisson(i,j,k-1,3) * preconditioner(i,j,k-1))
                 - mic_parameter * (poisson(i-1,j,k,1) * poisson(i-1,j,k,2) * poisson(i-1,j,k,3) * sqr(preconditioner(i-1,j, k))
                                     + poisson(i,j-1,k,2) * poisson(i,j-1,k,1) * poisson(i,j-1,k,3) * sqr(preconditioner(i,j-1, k))
-                                    + poisson(i,j, k-1,3) * poisson(i,j,k-1,2)* poisson(i,j-1,k,1)  * sqr(preconditioner(i,j,k-1)));
-            preconditioner(i,j)=1/sqrt(d+1e-6);
+                                    + poisson(i,j, k-1,3) * poisson(i,j,k-1,2)* poisson(i,j,k-1,1)  * sqr(preconditioner(i,j,k-1)));
+            preconditioner(i,j,k)=1.0/sqrt(d+1e-6);
         }
     }
 }å
