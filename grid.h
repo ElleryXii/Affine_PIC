@@ -31,7 +31,7 @@ struct Grid{
    Array3x3f poisson;
    Array3d preconditioner;
    Array3d m;
-   Array3d r, z, s;
+   Array3d r, z, s; //r: divergence
 
    Grid(void)
    {}
@@ -119,6 +119,7 @@ struct Grid{
 
    private:
    void init_phi(void);
+   void sweep_phi(int i0, int i1, int j0, int j1, int k0, int k1);
    void sweep_phi(void);
    void sweep_u(int i0, int i1, int j0, int j1);
    void sweep_v(int i0, int i1, int j0, int j1);
