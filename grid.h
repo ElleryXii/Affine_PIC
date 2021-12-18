@@ -84,6 +84,22 @@ struct Grid{
       else{ fy=sy-floor(sy); }
    }
 
+   void bary_z(float z, int &k, float &fz)
+   {
+      float sz = z*overh;
+      k = (int)sz;
+      fz = sz-floor(sz);
+   }
+
+   void bary_z_centre(float z, int &k, float &fz)
+   {
+      float sz = z*overh-0.5;
+      k = (int)sz;
+      if(k<0){ k=0; fz=0.0;}
+      else if(k>pressure.nz-2){ k=pressure.nz-2; fz=1.0; }
+      else{ fz = sz-floor(sz); }
+   }   
+
    void bilerp_uv(float px, float py, float &pu, float &pv)
    {
       int i, j;

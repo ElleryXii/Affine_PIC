@@ -15,38 +15,54 @@
 using namespace std;
 
 void Particles::
-add_particle(const Vec2f &px, const Vec2f &pu)
+add_particle(const Vec3f &px, const Vec3f &pu)
 {
    x.push_back(px);
    u.push_back(pu);
    /* TODO: initialize the variables you created in particles.h */
-   cx.push_back(Vec2f(0.f,0.f));
-   cy.push_back(Vec2f(0.f,0.f));
-
+   cx.push_back(Vec2f(0.f,0.f,0.f));
+   cy.push_back(Vec2f(0.f,0.f,0.f));
+   cy.push_back(Vec2f(0.f,0.f,0.f));	
    ++np;
 }
 
 template<class T>
 void Particles::
-accumulate(T &accum, float q, int i, int j, float fx, float fy)
+accumulate(T &accum, float q, int i, int j, int k, float fx, float fy, float fz)
 {
    float weight;
 
-   weight=(1-fx)*(1-fy);
-   accum(i,j)+=weight*q;
-   sum(i,j)+=weight;
+   weight=(1-fx)*(1-fy)*fz;
+   accum(i,j,k+1)+=weight*q;
+   sum(i,j,k+1)+=weight;
 
-   weight=fx*(1-fy);
-   accum(i+1,j)+=weight*q;
-   sum(i+1,j)+=weight;
+   weight=fx*(1-fy)*fz;
+   accum(i+1,j,k+1)+=weight*q;
+   sum(i+1,j,k+1)+=weight;
 
-   weight=(1-fx)*fy;
-   accum(i,j+1)+=weight*q;
-   sum(i,j+1)+=weight;
+   weight=(1-fx)*fy*fz;
+   accum(i,j+1,k+1)+=weight*q;
+   sum(i,j+1,k+1)+=weight;
 
-   weight=fx*fy;
-   accum(i+1,j+1)+=weight*q;
-   sum(i+1,j+1)+=weight;
+   weight=fx*fy*fz;
+   accum(i+1,j+1,k+1)+=weight*q;
+   sum(i+1,j+1,k+1)+=weight;
+
+   weight=(1-fx)*(1-fy)*(1-fz);
+   accum(i,j,k)+=weight*q;
+   sum(i,j,k)+=weight;
+
+   weight=fx*(1-fy)*(1-fz);
+   accum(i+1,j,k)+=weight*q;
+   sum(i+1,j,k)+=weight;
+
+   weight=(1-fx)*fy*(1-fz);
+   accum(i,j+1,k)+=weight*q;
+   sum(i,j+1,k)+=weight;
+
+   weight=fx*fy*(1-fz);
+   accum(i+1,j+1,k)+=weight*q;
+   sum(i+1,j+1,k)+=weight;
 }
 
 /* call this function to incorporate c[] when transfering particles to grid */
@@ -54,40 +70,58 @@ accumulate(T &accum, float q, int i, int j, float fx, float fy)
 /*  into the correct grid velocity values in accum */
 template<class T>
 void Particles::
-affineFix(T &accum, Vec2f c, int i, int j, float fx, float fy)
+affineFix(T &accum, Vec3f c, int i, int j, int k, float fx, float fy, float fz)
 {
     float weight;
    /* TODO: Affine fix */
-    weight = (1-fx)*(1-fy);
-    accum(i,j) +=  weight * (c[0] * fx + c[1] * fy);
+    weight = (1-fx)*(1-fy)*(1-fz);
+    accum(i,j,k) +=  weight * (c[0] * fx + c[1] * fy + c[2] * fz);
 
-    weight = fx*(1-fy);
-    accum(i+1,j) += weight * (c[0] * (1-fx) + c[1] * fy);
+    weight = fx*(1-fy)*(1-fz);
+    accum(i+1,j,k) += weight * (c[0] * (1-fx) + c[1] * fy + c[2] * fz);
 
-    weight = (1-fx)*fy;
-    accum(i,j+1) += weight * (c[0] * fx + c[1] * (1-fy));
+    weight = (1-fx)*fy*(1-fz);
+    accum(i,j+1,k) += weight * (c[0] * fx + c[1] * (1-fy) + c[2] * fz);
 
-    weight = fx*fy;
-    accum(i+1, j+1) += weight * (c[0]*(1-fx) + c[1] * (1-fy));
+    weight = fx*fy*(1-fz);
+    accum(i+1, j+1,k) += weight * (c[0]*(1-fx) + c[1] * (1-fy) + c[2] * fz);
+
+    weight = (1-fx)*(1-fy)*fz;
+    accum(i,j,k+1) +=  weight * (c[0] * fx + c[1] * fy + c[2] * (1-fz));
+
+    weight = fx*(1-fy)*fz;
+    accum(i+1,j,k+1) += weight * (c[0] * (1-fx) + c[1] * fy + c[2] * (1-fz));
+
+    weight = (1-fx)*fy*fz;
+    accum(i,j+1,k+1) += weight * (c[0] * fx + c[1] * (1-fy) + c[2] * (1-fz));
+
+    weight = fx*fy*fz;
+    accum(i+1, j+1, k+1) += weight * (c[0]*(1-fx) + c[1] * (1-fy) + c[2] * (1-fz));
 }
 
 void Particles::
 transfer_to_grid(void)
 {
-   int p, i, ui, j, vj;
-   float fx, ufx, fy, vfy;
+   int p, i, ui, j, vj, k, wk;
+   float fx, ufx, fy, vfy, fz, wfz;
 
    grid.u.zero();
    sum.zero();
    for(p=0; p<np; ++p){
       grid.bary_x(x[p][0], ui, ufx);
       grid.bary_y_centre(x[p][1], j, fy);
-      accumulate(grid.u, u[p][0], ui, j, ufx, fy);
+      grid.bary_z_centre(x[p][2], k, fz);
+      accumulate(grid.u, u[p][0], ui, j, k, ufx, fy, fz);
       /* TODO: call affineFix to incorporate c_px^n into the grid.u update */
-      affineFix(grid.u, cx[p], ui, j, ufx, fy);
+      affineFix(grid.u, cx[p], ui, j, k, ufx, fy, fz);
    }
-   for(j=0; j<grid.u.ny; ++j) for(i=0; i<grid.u.nx; ++i){
-      if(sum(i,j)!=0) grid.u(i,j)/=sum(i,j);
+
+   for(k=0; k<grid.u.nz; ++k){
+      for(j=0; j<grid.u.ny; ++j){ 
+         for(i=0; i<grid.u.nx; ++i){
+            if(sum(i,j,k)!=0) grid.u(i,j,k)/=sum(i,j,k);
+         }
+      }
    }
 
    grid.v.zero();
@@ -95,20 +129,43 @@ transfer_to_grid(void)
    for(p=0; p<np; ++p){
       grid.bary_x_centre(x[p][0], i, fx);
       grid.bary_y(x[p][1], vj, vfy);
-      accumulate(grid.v, u[p][1] , i, vj, fx, vfy);
+      grid.bary_z_centre(x[p][2], k, fz);
+      accumulate(grid.v, u[p][1] , i, vj, k, fx, vfy, fz);
       /* TODO: call affineFix to incorporate c_py^n into the grid.v update */
-      affineFix(grid.v, cy[p], i, vj, fx, vfy);
+      affineFix(grid.v, cy[p], i, vj, k, fx, vfy, fz);
    }
-   for(j=0; j<grid.v.ny; ++j) for(i=0; i<grid.v.nx; ++i){
-      if(sum(i,j)!=0) grid.v(i,j)/=sum(i,j);
+   for(k=0; k<grid.v.nz; ++k){
+      for(j=0; j<grid.v.ny; ++j){ 
+         for(i=0; i<grid.v.nx; ++i){
+            if(sum(i,j,k)!=0) grid.v(i,j,k)/=sum(i,j,k);
+         }
+      }
    }
 
+   grid.w.zero();
+   sum.zero();
+   for(p=0; p<np; ++p){
+      grid.bary_x_centre(x[p][0], i, fx);
+      grid.bary_y_centre(x[p][1], j, fy);
+      grid.bary_z(x[p][2], wk, wfz);
+      accumulate(grid.w, u[p][2] , i, j, wk, fx, fy, wfz);
+      /* TODO: call affineFix to incorporate c_py^n into the grid.v update */
+      affineFix(grid.w, cz[p], i, j, wk, fx, fy, wfz);
+   }
+   for(k=0; k<grid.w.nz; ++k){
+      for(j=0; j<grid.w.ny; ++j){ 
+         for(i=0; i<grid.w.nx; ++i){
+            if(sum(i,j,k)!=0) grid.w(i,j,k)/=sum(i,j,k);
+         }
+      }
+   }
    // identify where particles are in grid
    grid.marker.zero();
    for(p=0; p<np; ++p){
       grid.bary_x(x[p][0], i, fx);
       grid.bary_y(x[p][1], j, fy);
-      grid.marker(i,j)=FLUIDCELL;
+      grid.bary_z(x[p][2], k, fz);
+      grid.marker(i,j,k)=FLUIDCELL;
    }
 }
 
@@ -117,7 +174,7 @@ Vec2f Particles::
 computeC(Array2f &ufield, int i, int j, float fx, float fy) //ufield: grid.u or grid.v
 {
    /* TODO: Compute C  */
-   Vec2f c = Vec2f(fy - 1.0, fx - 1.0) * ufield(i,j)
+   Vec3f c = Vec2f(fy - 1.0, fx - 1.0) * ufield(i,j)
            + Vec2f(1.0 - fy, -fx) * ufield(i+1,j)
            + Vec2f(-fy, 1.0 - fx) * ufield(i,j+1)
            + Vec2f(fy, fx) * ufield(i+1,j+1);

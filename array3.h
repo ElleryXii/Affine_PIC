@@ -106,7 +106,7 @@ typedef Array3<double> Array3d;
 typedef Array3<char> Array3c;
 
 template<class T>
-struct Array3x3{
+struct Array3x4{
     int nx, ny;
     int size;
     T *data;
@@ -124,7 +124,7 @@ struct Array3x3{
         delete_memory();
         nx=nx_;
         ny=ny_;
-        size=3*nx*ny;
+        size=4*nx*ny*nz;
         data=new T[size];
         zero();
     }
@@ -139,10 +139,10 @@ struct Array3x3{
     }
 
     const T &operator() (int i, int j, int k) const
-    { return data[(i+nx*j)*3+k]; }
+    { return data[(i+nx*j)*4+k]; }
 
     T &operator() (int i, int j, int k)
-    { return data[(i+nx*j)*3+k]; }
+    { return data[(i+nx*j)*4+k]; }
 
     void zero()
     { std::memset(data, 0, size*sizeof(T)); }
@@ -164,7 +164,7 @@ struct Array3x3{
     }
 };
 
-typedef Array3x3<float> Array3x3f;
-typedef Array3x3<double> Array3x3d;
+typedef Array3x4<float> Array3x4f;
+typedef Array3x4<double> Array3x4d;
 
 #endif
