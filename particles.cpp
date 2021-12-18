@@ -149,7 +149,7 @@ transfer_to_grid(void)
       grid.bary_y_centre(x[p][1], j, fy);
       grid.bary_z(x[p][2], wk, wfz);
       accumulate(grid.w, u[p][2] , i, j, wk, fx, fy, wfz);
-      /* TODO: call affineFix to incorporate c_py^n into the grid.v update */
+      /* TODO: call affineFix to incorporate c_pz^n into the grid.w update */
       affineFix(grid.w, cz[p], i, j, wk, fx, fy, wfz);
    }
    for(k=0; k<grid.w.nz; ++k){
@@ -200,12 +200,12 @@ update_from_grid(void)
       if( simType == FLIP )
       {
          /*working on*/
-         u[p]+=Vec2f(grid.du.bilerp(ui, j, ufx, fy), grid.dv.bilerp(i, vj, fx, vfy)); // FLIP
+         u[p]+=Vec3f(grid.du.trilerp(ui, j, k, ufx, fy, fz), grid.dv.trilerp(i, vj, k, fx, vfy, fz), grid.dw.trilerp(i, j, wk, fx, fy, wfz)); // FLIP
       }
       else
       {
          /*working on*/
-         u[p]=Vec2f(grid.u.bilerp(ui, j, ufx, fy), grid.v.bilerp(i, vj, fx, vfy)); // PIC and APIC
+         u[p]=Vec3f(grid.u.trilerp(ui, j, k, ufx, fy, fz), grid.v.trilerp(i, vj, k, fx, vfy, fz), grid.w.trilerp(i, j, wk, fx, fy, wfz)); // PIC and APIC
 
          if( simType == APIC )
          {
@@ -227,13 +227,13 @@ move_particles_in_grid(float dt)
    float zmin=1.001*grid.h, zmax=grid.lz-1.001*grid.h;
    for(int p=0; p<np; ++p){
       // first stage of Runge-Kutta 2 (do a half Euler step)
-      grid.bilerp_uv(x[p][0], x[p][1], gu[0], gu[1]); // working
+      grid.trilerp_uvw(x[p][0], x[p][1], x[p][2], gu[0], gu[1], gu[2]); // working
       midx=x[p]+0.5*dt*gu;
       clamp(midx[0], xmin, xmax);
       clamp(midx[1], ymin, ymax);
       clamp(midx[2], zmin, zmax);
       // second stage of Runge-Kutta 2
-      grid.bilerp_uv(midx[0], midx[1], gu[0], gu[1]); // wokring
+      grid.trilerp_uvw(midx[0], midx[1], midx[2], gu[0], gu[1], gu[2]); // wokring
       x[p]+=dt*gu;
       clamp(x[p][0], xmin, xmax);
       clamp(x[p][1], ymin, ymax);
