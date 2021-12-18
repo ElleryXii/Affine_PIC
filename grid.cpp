@@ -58,7 +58,6 @@ save_velocities(void)
    w.copy_to(dw);
 }
 
-//TODO: OPTIONAL spherical gravity
 /* centered gravity is the spherical gravity I added. */
 /* for the normal uniform gravity, see lines 107-108 */
 void Grid::
@@ -114,20 +113,20 @@ add_gravity(float dt, bool centered, float cx, float cy)
    }
 }
 
-//TODO: # of itr
+// Fast sweeping converges after 2^n iteration, where n is the # of dimensions.
+//TOTEST: # of itr of sweep phi & velocity
 void Grid::
 compute_distance_to_fluid(void)
 {
    init_phi();
-   for(int i=0; i<2; ++i)
+   for(int i=0; i<4; ++i)
       sweep_phi();
 }
 
-//TODO: # of itr
 void Grid::
 extend_velocity(void)
 {
-   for(int i=0; i<4; ++i)
+   for(int i=0; i<8; ++i)
       sweep_velocity();
 }
 
@@ -163,7 +162,6 @@ make_incompressible(void)
    add_gradient();
 }
 
-//TOTEST
 void Grid::
 get_velocity_update(void)
 {
@@ -178,7 +176,6 @@ get_velocity_update(void)
 
 //====================================== private helper functions ============================
 
-//TOTEST
 void Grid::
 init_phi(void)
 {
@@ -194,20 +191,19 @@ init_phi(void)
    }
 }
 
-// 3D Eikonal equation
+// Eikonal equation, Level set method, approximate signed distance
 // Reference: Fluid Simulation for Computer Graphics 2nd Edition by Robert Bridson, Chapter 4 level set geometry, figure 4.4
-//TOTEST
+// DONE
 static inline void solve_distance(float phi0, float phi1, float phi2, float &r)
 {
-    //sort, ph0<phi1<phi2
+    //sort so that ph0<phi1<phi2
     if (phi0 > phi1) std::swap(phi0,phi1);
     if (phi1 > phi2) std::swap(phi1,phi2);
     if (phi0 > phi1) std::swap(phi0,phi1);
+
     float d = phi0+1;
-    if (d > phi1)
-        d = 0.5*(phi0+phi1+sqrt(2-sqr(phi1-phi0)));
-    if (d > phi2)
-        d = (phi0+phi1+phi2 + sqrt(max(0, sqr(phi0+phi1+phi2)-3*(sqr(phi0)+ sqr(phi1)+sqr(phi2)-1))))/3.0;
+    if (d > phi1) d = 0.5*(phi0+phi1+sqrt(2-sqr(phi1-phi0)));
+    if (d > phi2) d = (phi0+phi1+phi2 + sqrt(max(0, sqr(phi0+phi1+phi2)-3*(sqr(phi0)+ sqr(phi1)+sqr(phi2)-1))))/3.0;
     if(d<r) r=d;
 }
 
@@ -222,7 +218,6 @@ sweep_phi(int i0, int i1, int j0, int j1, int k0, int k1)
     }
 }
 
-//TOTEST
 void Grid::
 sweep_phi(void)
 {
@@ -230,76 +225,90 @@ sweep_phi(void)
     sweep_phi(1, phi.nx, 1, phi.ny, 1, phi.nz);
     sweep_phi(1, phi.nx, 1, phi.ny, phi.nz-2, -1);
     sweep_phi(1, phi.nx, phi.ny-2, -1, 1, phi.nz);
-    sweep_phi(phi.nx-2, -1, 1, phi.ny, 1, phi.nz);
     sweep_phi(1, phi.nx, phi.ny-2, -1,  phi.nz-2, -1);
+    sweep_phi(phi.nx-2, -1, 1, phi.ny, 1, phi.nz);
     sweep_phi(phi.nx-2, -1, 1, phi.ny, phi.nz-2, -1);
     sweep_phi(phi.nx-2, -1, phi.ny-2, -1, 1, phi.nz);
     sweep_phi(phi.nx-2, -1, phi.ny-2, -1, phi.nz-2, -1);
 }
 
-//TODO
+//TOTEST: ALL SWEEP FUNCTIONS Choose the closest point, test min/max
 void Grid::
-sweep_u(int i0, int i1, int j0, int j1)
+sweep_u(int i0, int i1, int j0, int j1, int k0, int k1)
 {
-   int di=(i0<i1) ? 1 : -1, dj=(j0<j1) ? 1 : -1;
-   float dp, dq, alpha;
-   for(int j=j0; j!=j1; j+=dj) for(int i=i0; i!=i1; i+=di)
-      if(marker(i-1,j)==AIRCELL && marker(i,j)==AIRCELL){
-         dp=di*(phi(i,j)-phi(i-1,j));
-         if(dp<0) continue; // not useful on this sweep direction
-         dq=0.5*(phi(i-1,j)+phi(i,j)-phi(i-1,j-dj)-phi(i,j-dj));
-         if(dq<0) continue; // not useful on this sweep direction
-         if(dp+dq==0) alpha=0.5;
-         else alpha=dp/(dp+dq);
-         u(i,j)=alpha*u(i-di,j)+(1-alpha)*u(i,j-dj);
-      }
-}
-//TODO
-void Grid::
-sweep_v(int i0, int i1, int j0, int j1)
-{
-   int di=(i0<i1) ? 1 : -1, dj=(j0<j1) ? 1 : -1;
-   float dp, dq, alpha;
-   for(int j=j0; j!=j1; j+=dj) for(int i=i0; i!=i1; i+=di)
-      if(marker(i,j-1)==AIRCELL && marker(i,j)==AIRCELL){
-         dq=dj*(phi(i,j)-phi(i,j-1));
-         if(dq<0) continue; // not useful on this sweep direction
-         dp=0.5*(phi(i,j-1)+phi(i,j)-phi(i-di,j-1)-phi(i-di,j));
-         if(dp<0) continue; // not useful on this sweep direction
-         if(dp+dq==0) alpha=0.5;
-         else alpha=dp/(dp+dq);
-         v(i,j)=alpha*v(i-di,j)+(1-alpha)*v(i,j-dj);
-      }
+    int di=(i0<i1) ? 1 : -1, dj=(j0<j1) ? 1 : -1, dk=(k0<k1)?1:-1;
+    float dp, dq, dr, d, alpha;
+    for (int k = k0; k!=k1; k+= dk) for(int j=j0; j!=j1; j+=dj) for(int i=i0; i!=i1; i+=di)
+        if(marker(i-1,j,k )==AIRCELL && marker(i,j,k)==AIRCELL){
+            dp = di*(phi(i,j,k)-phi(i-1,j,k));
+            if (dp<0) continue; // not useful on this sweep direction
+            dq = 0.5*(phi(i-1,j,k)+phi(i,j,k)-phi(i-1,j-dj,k)-phi(i,j-dj,k));
+            dr = 0.5*(phi(i-1,j,k)+phi(i,j,k)-phi(i-1,j,k-dk)-phi(i,j,k-dk));
+            if (dq<0 && dr<0) continue; // not useful on this sweep direction
+            if (dq < 0 || dq > dr){
+                std::swap(dq,dr)
+                d = u(i,j,k-dk));
+            }
+            else d = u(i,j-dj,k);
+            if(dp+dq==0) alpha=0.5;
+            else alpha=dp/(dp+dq);
+            u(i,j,k)=alpha*u(i-di,j,k)+(1-alpha)*d;
+        }
 }
 
-//TODO, combine sweeping
+void Grid::
+sweep_v(int i0, int i1, int j0, int j1, int k0, int k1)
+{
+    int di=(i0<i1) ? 1 : -1, dj=(j0<j1) ? 1 : -1, dk=(k0<k1)?1:-1;
+    float dp, dq, dr, d, alpha;
+    for (int k = k0; k != k1; k+=dk) for(int j=j0; j!=j1; j+=dj) for(int i=i0; i!=i1; i+=di)
+        if(marker(i,j-1, k)==AIRCELL && marker(i,j, k)==AIRCELL){
+            dq=dj*(phi(i,j, k)-phi(i,j-1,k));
+            if(dq<0) continue; // not useful on this sweep direction
+            dp=0.5*(phi(i,j-1,k)+phi(i,j, k)-phi(i-di,j-1, k)-phi(i-di,j, k));
+            dr=0.5*(phi(i,j-1,k)+phi(i,j,k)-phi(i,j-1,k-dk)-phi(i,j,k-dk));
+            if(dp<0 && dr<0) continue; // not useful on this sweep direction
+            if (dq < 0 || dq > dr){
+                std::swap(dq,dr)
+                d = v(i,j,k-dk));
+            }
+            else
+                d = v(i-di, j, k);
+            if(dp+dq==0) alpha=0.5;
+            else alpha=dp/(dp+dq);
+            v(i,j,k)=alpha*d+(1-alpha)*v(i,j-dj,k);
+        }
+}
+
 void Grid::
 sweep_w(int i0, int i1, int j0, int j1, int k0, int k1)
 {
-    int di=(i0<i1) ? 1 : -1, dj=(j0<j1) ? 1 : -1, dk = (k0<k1)?1:-1;
-    float dp, dq, dr, alpha;
+    int di=(i0<i1) ? 1 : -1, dj=(j0<j1) ? 1 : -1, dk = (k0<k1) ? 1 : -1;
+    float dp, dq, dr, d, alpha;
     for (int k = k0; k!=k1; k+=dk) for(int j=j0; j!=j1; j+=dj) for(int i=i0; i!=i1; i+=di)
         if(marker(i,j, k-1)==AIRCELL && marker(i,j,k)==AIRCELL)
         {
             dq=dj*(phi(i,j,k)-phi(i,j,k-1));
             if(dq<0) continue; // not useful on this sweep direction
-            dp=0.5*(phi(i,j-1)+phi(i,j)-phi(i-di,j-1)-phi(i-di,j));
-            if(dp<0) continue; // not useful on this sweep direction
-
-            if(dr<0) continue;
-
+            dp=0.5*(phi(i,j, k-1)+phi(i,j,k)-phi(i-di,j, k-1)-phi(i-di,j,k));
+            dr=0.5*(phi(i,j, k-1)+phi(i,j,k)-phi(i,j-dj, k-1)-phi(i,j-dj,k));
+            if(dp<0 && dr<0) continue; // not useful on this sweep direction
+            if (dq < 0 || dq > dr){
+                std::swap(dq,dr)
+                d = w(i,j-dj,k));
+            }
+            else
+                d = w(i-di, j, k);
             if(dp+dq==0) alpha=0.5;
             else alpha=dp/(dp+dq);
-            w(i,j)=alpha*v(i-di,j)+(1-alpha)*v(i,j-dj);
+            w(i,j,k)=alpha*d+(1-alpha)*w(i,j,k-dk);
         }
 }
-
 
 //TOTEST
 static inline void sweep_velocity_boundary(Array3f& vfield)
 {
     int i, j, k;
-
     for (i=0; i<vfield.nx; ++i){
         for (j = 0; j<vfield.ny; ++j){
             vfield(i,j, 0) = vfield(i,j,1);
@@ -322,30 +331,42 @@ static inline void sweep_velocity_boundary(Array3f& vfield)
     }
 }
 
-//TODO: add directions, add w, simplify?
+//TOTEST: SWEEP
 void Grid::
 sweep_velocity(void)
 {
     // sweep u, only into the air
-    sweep_u(1, u.nx-1, 1, u.ny-1);
-    sweep_u(1, u.nx-1, u.ny-2, 0);
-    sweep_u(u.nx-2, 0, 1, u.ny-1);
-    sweep_u(u.nx-2, 0, u.ny-2, 0);
+    sweep_u(1, u.nx-1, 1, u.ny-1, 1, u.nz-1);
+    sweep_u(1, u.nx-1, 1, u.ny-1, u.nz-2, 0);
+    sweep_u(1, u.nx-1, u.ny-2, 0, 1, u.nz-1);
+    sweep_u(1, u.nx-1, u.ny-2, 0, u.nz-2, 0);
+    sweep_u(u.nx-2, 0, 1, u.ny-1, 1, u.nz-1);
+    sweep_u(u.nx-2, 0, 1, u.ny-1, u.nz-2, 0);
+    sweep_u(u.nx-2, 0, u.ny-2, 0, 1, u.nz-1);
+    sweep_u(u.nx-2, 0, u.ny-2, 0, u.nz-2, 0);
     sweep_velocity_boundary(u);
 
     // now the same for v
-    sweep_v(1, v.nx-1, 1, v.ny-1);
-    sweep_v(1, v.nx-1, v.ny-2, 0);
-    sweep_v(v.nx-2, 0, 1, v.ny-1);
-    sweep_v(v.nx-2, 0, v.ny-2, 0);
-    sweep_velocity_boundary(v);
+    sweep_v(1, v.nx-1, 1, v.ny-1, 1, v.nz-1);
+    sweep_v(1, v.nx-1, 1, v.ny-1, v.nz-2, 0);
+    sweep_v(1, v.nx-1, v.ny-2, 0, 1, v.nz-1);
+    sweep_v(1, v.nx-1, v.ny-2, 0, v.nz-2, 0);
+    sweep_v(v.nx-2, 0, 1, v.ny-1, 1, v.nz-1);
+    sweep_v(v.nx-2, 0, 1, v.ny-1, v.nz-2, 0);
+    sweep_v(v.nx-2, 0, v.ny-2, 0, 1, v.nz-1);
+    sweep_v(v.nx-2, 0, v.ny-2, 0, v.nz-2, 0);
+    sweep_velocity_bovndary(v);
 
     // for w
-    sweep_w(1, w.nx-1, 1, w.ny-1);
-    sweep_w(1, w.nx-1, w.ny-2, 0);
-    sweep_w(w.nx-2, 0, 1, w.ny-1);
-    sweep_w(w.nx-2, 0, w.ny-2, 0);
-    sweep_velocity_boundary(w);
+    sweep_w(1, w.nx-1, 1, w.ny-1, 1, w.nz-1);
+    sweep_w(1, w.nx-1, 1, w.ny-1, w.nz-2, 0);
+    sweep_w(1, w.nx-1, w.ny-2, 0, 1, w.nz-1);
+    sweep_w(1, w.nx-1, w.ny-2, 0, w.nz-2, 0);
+    sweep_w(w.nx-2, 0, 1, w.ny-1, 1, w.nz-1);
+    sweep_w(w.nx-2, 0, 1, w.ny-1, w.nz-2, 0);
+    sweep_w(w.nx-2, 0, w.ny-2, 0, 1, w.nz-1);
+    sweep_w(w.nx-2, 0, w.ny-2, 0, w.nz-2, 0);
+    sweep_velocity_bowndary(w);
 }
 
 //TOTEST
@@ -412,7 +433,8 @@ apply_poisson(const Array3d &x, Array3d &y)
     }
 }
 
-//TOTEST blind
+//Reference: https://www.cs.ubc.ca/~rbridson/fluidsimulation/fluids_notes.pdf
+//TOTEST
 void Grid::
 form_preconditioner()
 {
@@ -422,8 +444,8 @@ form_preconditioner()
     for (int k=1; k<preconditioner.nz-1; ++k) for(int j=1; j<preconditioner.ny-1; ++j) for(int i=1; i<preconditioner.nx-1; ++i){
         if(marker(i,j,k)==FLUIDCELL){
             d = poisson(i,j,k,0)
-                - sqr( poisson(i-1,j, k,1) * preconditioner(i-1,j, k))
-                - sqr( poisson(i,j-1, k,2) * preconditioner(i,j-1, k))
+                - sqr( poisson(i-1,j,k,1) * preconditioner(i-1,j, k))
+                - sqr( poisson(i,j-1,k,2) * preconditioner(i,j-1, k))
                 - sqr( poisson(i,j,k-1,3) * preconditioner(i,j,k-1))
                 - mic_parameter * (poisson(i-1,j,k,1) * poisson(i-1,j,k,2) * poisson(i-1,j,k,3) * sqr(preconditioner(i-1,j, k))
                                     + poisson(i,j-1,k,2) * poisson(i,j-1,k,1) * poisson(i,j-1,k,3) * sqr(preconditioner(i,j-1, k))
@@ -433,7 +455,7 @@ form_preconditioner()
     }
 }å
 
-//TOTEST blind
+//TOTEST
 void Grid::
 apply_preconditioner(const Array3d &x, Array3d &y, Array3d &m)
 {
