@@ -171,13 +171,16 @@ transfer_to_grid(void)
 
 /* this function computes c from the gradient of w and the velocity field from the grid. */
 Vec2f Particles::
-computeC(Array2f &ufield, int i, int j, float fx, float fy) //ufield: grid.u or grid.v
+computeC(Array2f &ufield, int i, int j, int k, float fx, float fy, float fz) //ufield: grid.u or grid.v
 {
-   /* TODO: Compute C  */
-   Vec3f c = Vec2f(fy - 1.0, fx - 1.0) * ufield(i,j)
-           + Vec2f(1.0 - fy, -fx) * ufield(i+1,j)
-           + Vec2f(-fy, 1.0 - fx) * ufield(i,j+1)
-           + Vec2f(fy, fx) * ufield(i+1,j+1);
+   Vec3f c = Vec3f(-1.0*(1.0 - fy)*(1.0 - fz), -1.0*(1.0 - fx)*(1.0 - fz), -1.0*(1.0 - fx)*(1.0 - fy)) * ufield(i,j,k)
+           + Vec3f((1.0 - fy)*(1.0 - fz), -1.0*fx*(1.0 - fz), -1.0*fx*(1.0 - fy)) * ufield(i+1,j,k)
+           + Vec3f(-1.0* fy*(1.0 - fz), (1.0 - fx)*(1.0 - fz), -1.0*fx*(1.0 - fy)) * ufield(i,j+1,k)
+           + Vec3f(fy*(1.0 - fz), fx*(1.0 - fz), -1.0*fx*fy) * ufield(i+1,j+1,k)
+           + Vec3f(-1.0*(1.0 - fy)*fz, -1.0*(1.0 - fx)*fz, (1.0 -fx)*(1.0 - fy)) * ufield(i,j,k+1)
+           + Vec3f((1.0 - fy)*fz, -1.0*fx*fz, fx*(1.0 - fy)) * ufield(i+1, j, k+1)
+           + Vec3f(-1.0*fy*fz, (1.0-fx)*fz, (1.0-fx)*fy*fz) * ufield(i, j+1, k+1)
+           + Vec3f(fy*fz, fx*fz, fx*fy) * ufield(i+1, j+1, k+1);
    return c;
 }
 
@@ -185,26 +188,30 @@ void Particles::
 update_from_grid(void)
 {
    int p;
-   int i, ui, j, vj;
-   float fx, ufx, fy, vfy;
+   int i, ui, j, vj, k, wk;
+   float fx, ufx, fy, vfy, fz, wfz;
    for(p=0; p<np; ++p){
       grid.bary_x(x[p][0], ui, ufx);
       grid.bary_x_centre(x[p][0], i, fx);
       grid.bary_y(x[p][1], vj, vfy);
       grid.bary_y_centre(x[p][1], j, fy);
+      grid.bary_y(x[p][2], wk, wfz);
+      grid.bary_y_centre(x[p][2], k, fz);
       if( simType == FLIP )
       {
+         /*working on*/
          u[p]+=Vec2f(grid.du.bilerp(ui, j, ufx, fy), grid.dv.bilerp(i, vj, fx, vfy)); // FLIP
       }
       else
       {
+         /*working on*/
          u[p]=Vec2f(grid.u.bilerp(ui, j, ufx, fy), grid.v.bilerp(i, vj, fx, vfy)); // PIC and APIC
 
          if( simType == APIC )
          {
-            /* TODO: call computeC with the right indices to compute c_px^n and c_py^n */
-             cx[p] = computeC(grid.u, ui, j, ufx, fy);
-             cy[p] = computeC(grid.v, i, vj, fx, vfy);
+             cx[p] = computeC(grid.u, ui, j, k, ufx, fy, fz);
+             cy[p] = computeC(grid.v, i, vj, k, fx, vfy, fz);
+             cz[p] = computeC(grid.w, i, j, wk, fx, fy, wfz);
          }
       }
       
@@ -214,20 +221,23 @@ update_from_grid(void)
 void Particles::
 move_particles_in_grid(float dt)
 {
-   Vec2f midx, gu;
+   Vec3f midx, gu;
    float xmin=1.001*grid.h, xmax=grid.lx-1.001*grid.h;
    float ymin=1.001*grid.h, ymax=grid.ly-1.001*grid.h;
+   float zmin=1.001*grid.h, zmax=grid.lz-1.001*grid.h;
    for(int p=0; p<np; ++p){
       // first stage of Runge-Kutta 2 (do a half Euler step)
-      grid.bilerp_uv(x[p][0], x[p][1], gu[0], gu[1]);
+      grid.bilerp_uv(x[p][0], x[p][1], gu[0], gu[1]); // working
       midx=x[p]+0.5*dt*gu;
       clamp(midx[0], xmin, xmax);
       clamp(midx[1], ymin, ymax);
+      clamp(midx[2], zmin, zmax);
       // second stage of Runge-Kutta 2
-      grid.bilerp_uv(midx[0], midx[1], gu[0], gu[1]);
+      grid.bilerp_uv(midx[0], midx[1], gu[0], gu[1]); // wokring
       x[p]+=dt*gu;
       clamp(x[p][0], xmin, xmax);
       clamp(x[p][1], ymin, ymax);
+      clamp(x[p][2], zmin, zmax);
    }
 }
 
@@ -244,7 +254,7 @@ write_to_file(const char *filename_format, ...)
 
    fprintf(fp, "%d\n", np);
    for(int p=0; p<np; ++p)
-      fprintf(fp, "%.5g %.5g\n", x[p][0], x[p][1]);
+      fprintf(fp, "%.5g %.5g %.5g\n", x[p][0], x[p][1], x[p][2]);
    fclose(fp);
 }
 
