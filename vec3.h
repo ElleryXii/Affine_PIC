@@ -107,11 +107,13 @@ template<class T> inline T dot(const Vec3<T> &a, const Vec3<T> &b)
 
 //TODO
 template<class T> inline T cross(const Vec3<T> &a, const Vec3<T> &b)
-{ return a.v[0]*b.v[1]-a.v[1]*b.v[0]; }
+{ return Vec3<T>(a.v[1]*b.v[2]-a.v[2]*b.v[1],
+                 a.v[2]*b.v[0]-a.v[0]*b.v[2],
+                 a.v[0]*b.v[1]-a.v[1]*b.v[0]); }
 
 //TODO
-template<class T> inline Vec3<T> perp(const Vec3<T> &a)
-{ return Vec3<T>(-a.v[1], a.v[0]); }
+//template<class T> inline Vec3<T> perp(const Vec3<T> &a)
+//{ return Vec3<T>(-a.v[1], a.v[0]); }
 
 template<class T> inline void normalize(Vec3<T> &a)
 { a/=mag(a); }
