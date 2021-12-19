@@ -435,6 +435,7 @@ apply_poisson(const Array3d &x, Array3d &y)
                             + poisson(i,j,k,3) * x(i,j,k+1);
         }
     }
+
 }
 
 //Reference: https://www.cs.ubc.ca/~rbridson/fluidsimulation/fluids_notes.pdf
@@ -442,7 +443,7 @@ apply_poisson(const Array3d &x, Array3d &y)
 void Grid::
 form_preconditioner()
 {
-    const double mic_parameter=0.97;
+    const double mic_parameter=0.99;
     double d;
     preconditioner.zero();
     for (int k=1; k<preconditioner.nz-1; ++k) for(int j=1; j<preconditioner.ny-1; ++j) for(int i=1; i<preconditioner.nx-1; ++i){
@@ -515,7 +516,7 @@ solve_pressure(int maxits, double tolerance)
       }
       apply_preconditioner(r, z, m);
       double rhonew=z.dot(r);
-      double beta=rhonew/rho;
+      double beta=rhonew/(rho+1e-30);
       s.scale_and_increment(beta, z);
       rho=rhonew;
    }
@@ -528,19 +529,19 @@ add_gradient(void)
 {
    int i, j, k;
    for(k=1; k<u.nz-1;++k) for(j=1; j<u.ny-1; ++j) for(i=2; i<u.nx-2; ++i){
-      if(marker(i-1,j, k)|marker(i,j,k)==FLUIDCELL){ // if at least one is FLUID, neither is SOLID
+      if(marker(i-1,j, k)==FLUIDCELL || marker(i,j,k)==FLUIDCELL){ // if at least one is FLUID, neither is SOLID
          u(i,j,k)+=pressure(i,j, k)-pressure(i-1,j,k);
       }
    }
 
     for(k=1; k<v.nz-1;++k) for(j=2; j<v.ny-2; ++j) for(i=1; i<v.nx-1; ++i){
-      if(marker(i,j-1, k)|marker(i,j, k)==FLUIDCELL){ // if at least one is FLUID, neither is SOLID
+      if(marker(i,j-1, k)==FLUIDCELL || marker(i,j, k)==FLUIDCELL){ // if at least one is FLUID, neither is SOLID
          v(i,j,k)+=pressure(i,j, k)-pressure(i,j-1, k);
       }
    }
 
     for(k=2; k<w.nz-2;++k) for(j=1; j<w.ny-1; ++j) for(i=1; i<w.nx-1; ++i){
-        if(marker(i,j, k-1)|marker(i,j,k)==FLUIDCELL){ // if at least one is FLUID, neither is SOLID
+        if(marker(i,j, k-1)==FLUIDCELL || marker(i,j,k)==FLUIDCELL){ // if at least one is FLUID, neither is SOLID
             w(i,j,k)+=pressure(i,j, k)-pressure(i,j, k-1);
         }
     }

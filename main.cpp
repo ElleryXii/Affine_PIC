@@ -19,9 +19,9 @@ using namespace std;
 int main(int argc, char **argv)
 {
    float gravity = 9.8;
-   if(USE_SPHERICAL_GRAV)
-      gravity *= GRAV_FACTOR;
-   Grid grid(gravity, 50, 50, 50, 1);
+//   if(USE_SPHERICAL_GRAV)
+//      gravity *= GRAV_FACTOR;
+   Grid grid(gravity, 30, 30, 30, 1);
    SimulationType sType = SIMULATION_TYPE;
    
    std::string outputpath=".";
@@ -42,7 +42,7 @@ int main(int argc, char **argv)
    }
    Particles particles(grid, sType);
 
-   init_water_drop(grid, particles, 2, 2, 2);
+   init_water_drop(grid, particles, 10, 1, 1);
    particles.write_to_file("%s/frameparticles%04d", outputpath.c_str(), 0);
 
    for(int i=1; i<N_ITER + 1; ++i){

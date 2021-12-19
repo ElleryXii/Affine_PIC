@@ -89,6 +89,15 @@ struct Array3{
     void scale_and_increment(double scale, const Array3 &a)
     { for(int i=0; i<size; ++i) data[i]=scale*data[i]+a.data[i]; }
 
+    bool checknan(){
+        for (int i = 0; i<nx; i++)
+            for (int j = 0; j<ny;j++)
+                for (int k =0; k<nz; k++)
+                    if ((*this)(i,j,k)!=(*this)(i,j,k))
+                        return true;
+        return false;
+    }
+
     void write_matlab(FILE *fp, const char *variable_name)
     {
         fprintf(fp, "%s=[", variable_name);
@@ -158,6 +167,16 @@ struct Array3x4{
         for(int i=0; i<size; ++i)
             if(!(std::fabs(data[i])<=r)) r=std::fabs(data[i]);
         return r;
+    }
+
+    bool checknan(){
+        for (int i = 0; i<nx; i++)
+            for (int j = 0; j<ny;j++)
+                for (int k =0; k<nz; k++)
+                    for (int m = 0; m<4; ++m)
+                        if ((*this)(i,j,k, m)!=(*this)(i,j,k,m))
+                            return true;
+        return false;
     }
 
     void write_matlab(FILE *fp, const char *variable_name)

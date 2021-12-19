@@ -5,6 +5,7 @@
  * Based on Bridson's simple_flip2d starter code at http://www.cs.ubc.ca/~rbridson/
  */
 
+#include <iostream>
 #ifndef GRID_H
 #define GRID_H
 
@@ -48,9 +49,6 @@ struct Grid{
    void apply_boundary_conditions(void);
    void make_incompressible(void);
    void get_velocity_update(void);
-
-   //TODO: unify bary functions
-
 
    void bary_x(float x, int &i, float &fx)
    {
