@@ -252,7 +252,7 @@ write_to_file(const char *filename_format, ...)
    free(filename);
    va_end(ap);
 
-   fprintf(fp, "%d %lf\n", np, 0.0014);
+   fprintf(fp, "%d %lf\n", np, 0.002);
    for(int p=0; p<np; ++p)
       fprintf(fp, "%.5g %.5g %.5g\n", x[p][0], x[p][1], x[p][2]);
    fclose(fp);
