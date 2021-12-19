@@ -28,7 +28,7 @@ struct Grid{
    Array3f phi; // decays away from water into air (used for extrapolating velocity)
    Array3d pressure;
    // stuff for the pressure solve
-   Array3x3f poisson;
+   Array3x4f poisson;
    Array3d preconditioner;
    Array3d m;
    Array3d r, z, s; //r: divergence
@@ -98,21 +98,8 @@ struct Grid{
       if(k<0){ k=0; fz=0.0;}
       else if(k>pressure.nz-2){ k=pressure.nz-2; fz=1.0; }
       else{ fz = sz-floor(sz); }
-   }   
-
-   void bilerp_uv(float px, float py, float &pu, float &pv)
-   {
-      int i, j;
-      float fx, fy;
-      bary_x(px, i, fx);
-      bary_y_centre(py, j, fy);
-      pu=u.bilerp(i, j, fx, fy);
-      bary_x_centre(px, i, fx);
-      bary_y(py, j, fy);
-      pv=v.bilerp(i, j, fx, fy);
    }
 
-   //TODO
    void trilerp_uvw(float px, float py, float pz, float &pu, float &pv, float &pw){
       int i, j, k;
       float fx, fy, fz;
@@ -134,9 +121,9 @@ struct Grid{
    void init_phi(void);
    void sweep_phi(int i0, int i1, int j0, int j1, int k0, int k1);
    void sweep_phi(void);
-   void sweep_u(int i0, int i1, int j0, int j1);
-   void sweep_v(int i0, int i1, int j0, int j1);
-   void sweep_w(int i0, int i1, int j0, int j1);
+   void sweep_u(int i0, int i1, int j0, int j1, int k0, int k1);
+   void sweep_v(int i0, int i1, int j0, int j1, int k0, int k1);
+   void sweep_w(int i0, int i1, int j0, int j1, int k0, int k1);
    void sweep_velocity(void);
    void find_divergence(void);
    void form_poisson(void);

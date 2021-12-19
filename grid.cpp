@@ -32,7 +32,7 @@ init(float gravity_, int cell_nx, int cell_ny, int cell_nz, float lx_)
    phi.init(cell_nx, cell_ny, cell_nz);
    du.init(cell_nx+1, cell_ny, cell_nz);
    dv.init(cell_nx, cell_ny+1, cell_nz);
-   dw.init(cell_nx, cell_ny, cell_nz+1)
+   dw.init(cell_nx, cell_ny, cell_nz+1);
    poisson.init(cell_nx, cell_ny, cell_nz);
    preconditioner.init(cell_nx, cell_ny, cell_nz);
    m.init(cell_nx, cell_ny, cell_nz);
@@ -62,9 +62,10 @@ save_velocities(void)
 /* centered gravity is the spherical gravity I added. */
 /* for the normal uniform gravity, see lines 107-108 */
 void Grid::
-add_gravity(float dt, bool centered, float cx, float cy)
+add_gravity(float dt, bool centered, float cx, float cy, float cz)
 {
    float dtg=dt*gravity;
+   /*center
    if( centered )
    {
       for(int i = 0; i < u.nx; ++i)
@@ -107,11 +108,12 @@ add_gravity(float dt, bool centered, float cx, float cy)
          }
       }
    }
-   else
-   {
+    */
+//   else
+//   {
       for(int i=0; i<v.size; ++i)
          v.data[i]-=dtg;
-   }
+//   }
 }
 
 // Fast sweeping converges after 2^n iteration, where n is the # of dimensions.
@@ -203,8 +205,8 @@ static inline void solve_distance(float phi0, float phi1, float phi2, float &r)
     if (phi0 > phi1) std::swap(phi0,phi1);
 
     float d = phi0+1;
-    if (d > phi1) d = 0.5*(phi0+phi1+sqrt(2-sqr(phi1-phi0)));
-    if (d > phi2) d = (phi0+phi1+phi2 + sqrt(max(0, sqr(phi0+phi1+phi2)-3*(sqr(phi0)+ sqr(phi1)+sqr(phi2)-1))))/3.0;
+    if (d > phi1) d = 0.5*(phi0+phi1+sqrt(2.0-sqr(phi1-phi0)));
+    if (d > phi2) d = (phi0+phi1+phi2 + sqrt(max(0.0, sqr(phi0+phi1+phi2)-3.0*(sqr(phi0)+ sqr(phi1)+sqr(phi2)-1.0))))/3.0;
     if(d<r) r=d;
 }
 
@@ -247,8 +249,8 @@ sweep_u(int i0, int i1, int j0, int j1, int k0, int k1)
             dr = 0.5*(phi(i-1,j,k)+phi(i,j,k)-phi(i-1,j,k-dk)-phi(i,j,k-dk));
             if (dq<0 && dr<0) continue; // not useful on this sweep direction
             if (dq < 0 || dq > dr){
-                std::swap(dq,dr)
-                d = u(i,j,k-dk));
+                std::swap(dq,dr);
+                d = u(i,j,k-dk);
             }
             else d = u(i,j-dj,k);
             if(dp+dq==0) alpha=0.5;
@@ -270,8 +272,8 @@ sweep_v(int i0, int i1, int j0, int j1, int k0, int k1)
             dr=0.5*(phi(i,j-1,k)+phi(i,j,k)-phi(i,j-1,k-dk)-phi(i,j,k-dk));
             if(dp<0 && dr<0) continue; // not useful on this sweep direction
             if (dq < 0 || dq > dr){
-                std::swap(dq,dr)
-                d = v(i,j,k-dk));
+                std::swap(dq,dr);
+                d = v(i,j,k-dk);
             }
             else
                 d = v(i-di, j, k);
@@ -295,8 +297,8 @@ sweep_w(int i0, int i1, int j0, int j1, int k0, int k1)
             dr=0.5*(phi(i,j, k-1)+phi(i,j,k)-phi(i,j-dj, k-1)-phi(i,j-dj,k));
             if(dp<0 && dr<0) continue; // not useful on this sweep direction
             if (dq < 0 || dq > dr){
-                std::swap(dq,dr)
-                d = w(i,j-dj,k));
+                std::swap(dq,dr);
+                d = w(i,j-dj,k);
             }
             else
                 d = w(i-di, j, k);
@@ -356,7 +358,7 @@ sweep_velocity(void)
     sweep_v(v.nx-2, 0, 1, v.ny-1, v.nz-2, 0);
     sweep_v(v.nx-2, 0, v.ny-2, 0, 1, v.nz-1);
     sweep_v(v.nx-2, 0, v.ny-2, 0, v.nz-2, 0);
-    sweep_velocity_bovndary(v);
+    sweep_velocity_boundary(v);
 
     // for w
     sweep_w(1, w.nx-1, 1, w.ny-1, 1, w.nz-1);
@@ -367,7 +369,7 @@ sweep_velocity(void)
     sweep_w(w.nx-2, 0, 1, w.ny-1, w.nz-2, 0);
     sweep_w(w.nx-2, 0, w.ny-2, 0, 1, w.nz-1);
     sweep_w(w.nx-2, 0, w.ny-2, 0, w.nz-2, 0);
-    sweep_velocity_bowndary(w);
+    sweep_velocity_boundary(w);
 }
 
 //TOTEST
@@ -377,7 +379,7 @@ find_divergence(void)
    r.zero();
    for(int k = 0; k<r.nz; ++k)for(int j=0; j<r.ny; ++j) for(int i=0; i<r.nx; ++i){
       if(marker(i,j, k)==FLUIDCELL)
-         r(i,j, k)=u(i+1,j,k)-u(i,j, k)+v(i,j+1,k)-v(i,j)+w(i,j,k+1)-w(i,j,k);
+         r(i,j, k)=u(i+1,j,k)-u(i,j, k)+v(i,j+1,k)-v(i,j,k)+w(i,j,k+1)-w(i,j,k);
    }
 }
 
@@ -429,7 +431,7 @@ apply_poisson(const Array3d &x, Array3d &y)
                             + poisson(i,j-1,k,2) * x(i,j-1,k)
                             + poisson(i,j,k,2) * x(i,j+1,k)
                             + poisson(i,j,k-1,3) * x(i,j,k-1)
-                            + poisson(i,j,k,3) * x(i,j,k+1)
+                            + poisson(i,j,k,3) * x(i,j,k+1);
         }
     }
 }
@@ -439,7 +441,7 @@ apply_poisson(const Array3d &x, Array3d &y)
 void Grid::
 form_preconditioner()
 {
-    const double mic_parameter=0.99;
+    const double mic_parameter=0.97;
     double d;
     preconditioner.zero();
     for (int k=1; k<preconditioner.nz-1; ++k) for(int j=1; j<preconditioner.ny-1; ++j) for(int i=1; i<preconditioner.nx-1; ++i){
@@ -449,12 +451,12 @@ form_preconditioner()
                 - sqr( poisson(i,j-1,k,2) * preconditioner(i,j-1, k))
                 - sqr( poisson(i,j,k-1,3) * preconditioner(i,j,k-1))
                 - mic_parameter * (poisson(i-1,j,k,1) * poisson(i-1,j,k,2) * poisson(i-1,j,k,3) * sqr(preconditioner(i-1,j, k))
-                                    + poisson(i,j-1,k,2) * poisson(i,j-1,k,1) * poisson(i,j-1,k,3) * sqr(preconditioner(i,j-1, k))
-                                    + poisson(i,j, k-1,3) * poisson(i,j,k-1,2)* poisson(i,j,k-1,1)  * sqr(preconditioner(i,j,k-1)));
+                                    + poisson(i,j-1,k,1) * poisson(i,j-1,k,2) * poisson(i,j-1,k,3) * sqr(preconditioner(i,j-1, k))
+                                    + poisson(i,j,k-1,1) +poisson(i,j, k-1,2) * poisson(i,j,k-1,3)* sqr(preconditioner(i,j,k-1)));
             preconditioner(i,j,k)=1.0/sqrt(d+1e-6);
         }
     }
-}å
+}
 
 //TOTEST
 void Grid::
@@ -467,9 +469,9 @@ apply_preconditioner(const Array3d &x, Array3d &y, Array3d &m)
     for(k=1; k<x.nz-1; ++k) for(j=1; j<x.ny-1; ++j) for(i=1; i<x.nx-1; ++i)
         if(marker(i,j,k)==FLUIDCELL)
         {
-            d = x(i,j, k)
+            d = x(i,j,k)
                 - poisson(i-1,j,k, 1)*preconditioner(i-1,j,k)*m(i-1,j,k)
-                - poisson(i,j-1,k,2)*preconditioner(i,j-1, k)*m(i,j-1, k)
+                - poisson(i,j-1,k, 2)*preconditioner(i,j-1, k)*m(i,j-1, k)
                 - poisson(i,j,k-1,3)*preconditioner(i,j, k-1)*m(i,j, k-1);
             m(i,j, k) = preconditioner(i,j, k)*d;
         }
@@ -477,7 +479,7 @@ apply_preconditioner(const Array3d &x, Array3d &y, Array3d &m)
     // solve L'*y=m
     y.zero();
     for(k=x.nz-2; k>0; --k) for(j=x.ny-2; j>0; --j) for(i=x.nx-2; i>0; --i)
-        if(marker(i,j)==FLUIDCELL)
+        if(marker(i,j,k)==FLUIDCELL)
         {
             d = m(i,j,k)
                 - poisson(i,j,k,1)*preconditioner(i,j,k)*y(i+1,j,k)
@@ -538,7 +540,7 @@ add_gradient(void)
 
     for(k=2; k<w.nz-2;++k) for(j=1; j<w.ny-1; ++j) for(i=1; i<w.nx-1; ++i){
         if(marker(i,j, k-1)|marker(i,j,k)==FLUIDCELL){ // if at least one is FLUID, neither is SOLID
-            w(i,j, k)+=pressure(i,j, k)-pressure(i,j, k-1);
+            w(i,j,k)+=pressure(i,j, k)-pressure(i,j, k-1);
         }
     }
 }

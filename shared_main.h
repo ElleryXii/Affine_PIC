@@ -18,6 +18,7 @@
 #define INIT_VEL_MAGNITUDE (0.55)
 #define GRAV_CENTER_X (0.5)
 #define GRAV_CENTER_Y (0.5)
+#define GRAV_CENTER_Z (0.5)
 #define GRAV_FACTOR (0.01)
 
 using namespace std;
@@ -66,22 +67,22 @@ void init_water_drop(Grid &grid, Particles &particles, int na, int nb, int nc)
                           x=(i+(a+0.1+0.8*rand()/(double)RAND_MAX)/na)*grid.h;
                           y=(j+(b+0.1+0.8*rand()/(double)RAND_MAX)/nb)*grid.h;
                           z=(k+(c+0.1+0.8*rand()/(double)RAND_MAX)/nc)*grid.h;
-                          if( USE_SPHERICAL_GRAV )
-                          {
-                              vx = INIT_VEL_MAGNITUDE * grid.lx * (rand() * 2.0 / (double)RAND_MAX + 0.5 );
-                              vy = INIT_VEL_MAGNITUDE * grid.ly * (rand() * 2.0 / (double)RAND_MAX - 1.0 );
-                              vz = INIT_VEL_MAGNITUDE * grid.ly * (rand() * 2.0 / (double)RAND_MAX - 1.0 );
-                          }
+//                          if( USE_SPHERICAL_GRAV )
+//                          {
+//                              vx = INIT_VEL_MAGNITUDE * grid.lx * (rand() * 2.0 / (double)RAND_MAX + 0.5 );
+//                              vy = INIT_VEL_MAGNITUDE * grid.ly * (rand() * 2.0 / (double)RAND_MAX - 1.0 );
+//                              vz = INIT_VEL_MAGNITUDE * grid.ly * (rand() * 2.0 / (double)RAND_MAX - 1.0 );
+//                          }
                           phi=fluidphi(grid, x, y, z);
                           if(phi>-0.25*grid.h/na)
                               continue;
                           else if(phi>-1.5*grid.h/na){
                               project(grid, x, y, z, phi, -0.75*grid.h/na);
-                              phi=fluidphi(grid, x, y);
+                              phi=fluidphi(grid, x, y,z);
                               project(grid, x, y, z, phi, -0.75*grid.h/na);
-                              phi=fluidphi(grid, x, y);
+                              phi=fluidphi(grid, x, y,z);
                           }
-                          particles.add_particle(Vec2f(x,y,z), Vec2f(vx,vy,vz));
+                          particles.add_particle(Vec3f(x,y,z), Vec3f(vx,vy,vz));
                       }
                   }
               }
@@ -98,7 +99,7 @@ void advance_one_step(Grid &grid, Particles &particles, double dt)
       particles.move_particles_in_grid(0.2*dt);
    particles.transfer_to_grid();
    grid.save_velocities();
-   grid.add_gravity(dt, USE_SPHERICAL_GRAV, GRAV_CENTER_X * grid.lx, GRAV_CENTER_Y  * grid.ly);
+   grid.add_gravity(dt, USE_SPHERICAL_GRAV, GRAV_CENTER_X * grid.lx, GRAV_CENTER_Y  * grid.ly, GRAV_CENTER_Z *grid.lz);
    grid.compute_distance_to_fluid();
    grid.extend_velocity();
    grid.apply_boundary_conditions();

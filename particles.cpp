@@ -20,9 +20,9 @@ add_particle(const Vec3f &px, const Vec3f &pu)
    x.push_back(px);
    u.push_back(pu);
    /* TODO: initialize the variables you created in particles.h */
-   cx.push_back(Vec2f(0.f,0.f,0.f));
-   cy.push_back(Vec2f(0.f,0.f,0.f));
-   cy.push_back(Vec2f(0.f,0.f,0.f));	
+   cx.push_back(Vec3f(0.f,0.f,0.f));
+   cy.push_back(Vec3f(0.f,0.f,0.f));
+   cz.push_back(Vec3f(0.f,0.f,0.f));
    ++np;
 }
 
@@ -170,8 +170,8 @@ transfer_to_grid(void)
 }
 
 /* this function computes c from the gradient of w and the velocity field from the grid. */
-Vec2f Particles::
-computeC(Array2f &ufield, int i, int j, int k, float fx, float fy, float fz) //ufield: grid.u or grid.v
+Vec3f Particles::
+computeC(Array3f &ufield, int i, int j, int k, float fx, float fy, float fz) //ufield: grid.u or grid.v
 {
    Vec3f c = Vec3f(-1.0*(1.0 - fy)*(1.0 - fz), -1.0*(1.0 - fx)*(1.0 - fz), -1.0*(1.0 - fx)*(1.0 - fy)) * ufield(i,j,k)
            + Vec3f((1.0 - fy)*(1.0 - fz), -1.0*fx*(1.0 - fz), -1.0*fx*(1.0 - fy)) * ufield(i+1,j,k)
@@ -252,7 +252,7 @@ write_to_file(const char *filename_format, ...)
    free(filename);
    va_end(ap);
 
-   fprintf(fp, "%d\n", np);
+   fprintf(fp, "%d %lf\n", np, 0.0014);
    for(int p=0; p<np; ++p)
       fprintf(fp, "%.5g %.5g %.5g\n", x[p][0], x[p][1], x[p][2]);
    fclose(fp);

@@ -33,7 +33,7 @@ struct Vec3
     { v[0]=(T)source[0]; v[1]=(T)source[1]; v[2]=(T)source[2]; }
 
     Vec3(T v0, T v1, T v2)
-    { v[0]=v0; v[1]=v1; v[2] = v[2]}
+    { v[0]=v0; v[1]=v1; v[2] = v[2];}
 
     T &operator[](int index)
     {
@@ -83,7 +83,7 @@ template<class T> inline bool operator!=(const Vec3<T> &a, const Vec3<T> &b)
 template<class T> inline Vec3<T> operator-(const Vec3<T> &a)
 { return Vec3<T>(-a.v[0], -a.v[1], -a.v[2]); }
 
-template<class T> inline Vec3<T> operator+(const Vec3<T> &a, const Vec3<T> &b, const Vec3<T> &c)
+template<class T> inline Vec3<T> operator+(const Vec3<T> &a, const Vec3<T> &b)
 { return Vec3<T>(a.v[0]+b.v[0], a.v[1]+b.v[1], a.v[2]+b.v[2]); }
 
 template<class T>
@@ -105,13 +105,11 @@ inline Vec3<T> operator/(const Vec3<T> &a, S scalar)
 template<class T> inline T dot(const Vec3<T> &a, const Vec3<T> &b)
 { return a.v[0]*b.v[0] + a.v[1]*b.v[1] + a.v[2]*b.v[2]; }
 
-//TODO
 template<class T> inline T cross(const Vec3<T> &a, const Vec3<T> &b)
 { return Vec3<T>(a.v[1]*b.v[2]-a.v[2]*b.v[1],
                  a.v[2]*b.v[0]-a.v[0]*b.v[2],
                  a.v[0]*b.v[1]-a.v[1]*b.v[0]); }
 
-//TODO
 //template<class T> inline Vec3<T> perp(const Vec3<T> &a)
 //{ return Vec3<T>(-a.v[1], a.v[0]); }
 
