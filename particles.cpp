@@ -171,7 +171,7 @@ transfer_to_grid(void)
 
 /* this function computes c from the gradient of w and the velocity field from the grid. */
 Vec3f Particles::
-computeC(Array3f &ufield, int i, int j, int k, float fx, float fy, float fz) //ufield: grid.u or grid.v
+computeC(Array3f &ufield, int i, int j, int k, float fx, float fy, float fz) //ufield: grid.u, grid.v, grid.v
 {
    Vec3f c = Vec3f(-1.0*(1.0 - fy)*(1.0 - fz), -1.0*(1.0 - fx)*(1.0 - fz), -1.0*(1.0 - fx)*(1.0 - fy)) * ufield(i,j,k)
            + Vec3f((1.0 - fy)*(1.0 - fz), -1.0*fx*(1.0 - fz), -1.0*fx*(1.0 - fy)) * ufield(i+1,j,k)
@@ -195,8 +195,8 @@ update_from_grid(void)
       grid.bary_x_centre(x[p][0], i, fx);
       grid.bary_y(x[p][1], vj, vfy);
       grid.bary_y_centre(x[p][1], j, fy);
-      grid.bary_y(x[p][2], wk, wfz);
-      grid.bary_y_centre(x[p][2], k, fz);
+      grid.bary_z(x[p][2], wk, wfz);
+      grid.bary_z_centre(x[p][2], k, fz);
       if( simType == FLIP )
       {
          /*working on*/
@@ -226,7 +226,7 @@ move_particles_in_grid(float dt)
    float ymin=1.001*grid.h, ymax=grid.ly-1.001*grid.h;
    float zmin=1.001*grid.h, zmax=grid.lz-1.001*grid.h;
    for(int p=0; p<np; ++p){
-      // first stage of Runge-Kutta 2 (do a half Euler step)
+       // first stage of Runge-Kutta 2 (do a half Euler step)
       grid.trilerp_uvw(x[p][0], x[p][1], x[p][2], gu[0], gu[1], gu[2]); // working
       midx=x[p]+0.5*dt*gu;
       clamp(midx[0], xmin, xmax);
