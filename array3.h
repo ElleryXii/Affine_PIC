@@ -5,7 +5,6 @@
  * Based on Bridson's simple_flip2d starter code at http://www.cs.ubc.ca/~rbridson/
  */
 
-//TODO: NOT IMPLEMENTED!
 
 #ifndef ARRAY3
 #define ARRAY3
@@ -50,7 +49,7 @@ struct Array3{
 
     //array arrangement: (0,0,0) -> (1,0,0) -> ... -> (0,1,0) -> ... -> (0,0,1)
     const T &operator() (int i, int j, int k) const
-    { return data[i+nx*j+nx*ny*z]; }
+    { return data[i+nx*j+nx*ny*k]; }
 
 
     T &operator() (int i, int j, int k)
