@@ -75,7 +75,10 @@ bool read_frame(int newframe)
 
 void set_view(Gluvi::Target3D &cam)
 {
-   cam.dist=0.5;
+    cam.dist=2;
+    cam.target[0] = 0.5;
+    cam.target[1] = 0.5;
+    cam.target[2] = 0.5;
 }
 
 void set_lights_and_material(int object)
