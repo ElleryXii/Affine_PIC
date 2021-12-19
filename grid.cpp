@@ -138,7 +138,6 @@ void Grid::
 apply_boundary_conditions(void)
 {
     int i, j, k;
-
     for (i=0; i<marker.nx; ++i){
         for (j = 0; j<marker.ny; ++j){
             marker(i,j, 0) = marker(i,j, marker.nz-1) = SOLIDCELL;
@@ -156,21 +155,14 @@ apply_boundary_conditions(void)
             marker(0,j,k)=marker(marker.nx-1,j,k) = SOLIDCELL;
         }
     }
-//    // first mark where solid is
-//    for (k=0; k<marker.nz; ++k)
-//        marker(0, 0, k) = marker(marker.nx-1,marker.ny-1 ,k)=SOLIDCELL;
-//    for (j=0; j<marker.ny; ++j)
-//        marker(0,j, 0)=marker(marker.nx-1, j, marker.nz-1)=SOLIDCELL;
-//    for (i=0; i<marker.nx; ++i)
-//        marker(i,0, 0)=marker(i,marker.ny-1,marker.nz-1)=SOLIDCELL;
 
     // now makre sure nothing leaves the domain
-    for(k=0; k<w.nz; ++k)
-        w(0,0,k)=w(1,1,k)=w(w.nx-1, w.ny-1,k)=w(w.nx-2,w.ny-2,j)=0;
-    for(j=0; j<u.ny; ++j)
-        u(0,j,0)=u(1,j,1)=u(u.nx-1,j,u.nz-1)=u(u.nx-2,j,u.nz-2)=0;
-    for(i=0; i<v.nx; ++i)
-        v(i,0,0)=v(i,1,1)=v(i,v.ny-1,v.nz-1)=v(i,v.ny-2,v.nz-2)=0;
+    for (i = 0; i<w.nx; ++i) for(j=0;j<w.ny; ++j)
+        w(i,j,0)=w(i,j,1)=w(i,j,w.nz-1)=w(i,j,w.nz-2)=0;
+    for (i = 0; i<v.nx; ++i) for(int k=0; k<v.nz; ++k)
+        v(i,0,k)=v(i,1,k)=v(i,v.ny-1,k)=v(i,v.ny-2,k)=0;
+    for (j = 0; j<u.ny; ++j) for(int k=0; k<u.nz; ++k)
+        u(0,j,k)=u(1,j,k)=u(u.nx-1,j,k)=u(u.nx-2,j, k)=0;
 }
 
 void Grid::
