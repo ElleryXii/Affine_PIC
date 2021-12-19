@@ -58,6 +58,7 @@ save_velocities(void)
    w.copy_to(dw);
 }
 
+//Spherical gravity not implemented for 3d
 /* centered gravity is the spherical gravity I added. */
 /* for the normal uniform gravity, see lines 107-108 */
 void Grid::
