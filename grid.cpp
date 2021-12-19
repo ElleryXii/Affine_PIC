@@ -388,12 +388,12 @@ add_gradient(void)
 {
    int i, j;
    for(j=1; j<u.ny-1; ++j) for(i=2; i<u.nx-2; ++i){
-      if(marker(i-1,j)|marker(i,j)==FLUIDCELL){ // if at least one is FLUID, neither is SOLID
+      if(marker(i-1,j)==FLUIDCELL||marker(i,j)==FLUIDCELL){ // if at least one is FLUID, neither is SOLID
          u(i,j)+=pressure(i,j)-pressure(i-1,j);
       }
    }
    for(j=2; j<v.ny-2; ++j) for(i=1; i<v.nx-1; ++i){
-      if(marker(i,j-1)|marker(i,j)==FLUIDCELL){ // if at least one is FLUID, neither is SOLID
+      if(marker(i,j-1)==FLUIDCELL||marker(i,j)==FLUIDCELL){ // if at least one is FLUID, neither is SOLID
          v(i,j)+=pressure(i,j)-pressure(i,j-1);
       }
    }
