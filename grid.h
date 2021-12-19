@@ -114,7 +114,20 @@ struct Grid{
 
    //TODO
    void trilerp_uvw(float px, float py, float pz, float &pu, float &pv, float &pw){
-
+      int i, j, k;
+      float fx, fy, fz;
+      bary_x(px, i, fx);
+      bary_y_centre(py, j, fy);
+      bary_z_centre(pz, k, fz);
+      pu=u.trilerp(i, j, k, fx, fy, fz);
+      bary_x_centre(px, i, fx);
+      bary_y(py, j, fy);
+      bary_z_centre(pz, k, fz);
+      pv=v.trilerp(i, j, k, fx, fy, fz);
+      bary_x_centre(px, i, fx);
+      bary_y_centre(py, j, fy);
+      bary_z(pz, k, fz);
+      pw=w.trilerp(i, j, k, fx, fy, fz);
    }
 
    private:
