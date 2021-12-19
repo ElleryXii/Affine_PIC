@@ -138,13 +138,31 @@ void Grid::
 apply_boundary_conditions(void)
 {
     int i, j, k;
-    // first mark where solid is
-    for (k=0; k<marker.nz; ++k)
-        marker(0, 0, k) = marker(marker.nx-1,marker.ny-1 ,k) = SOLIDCELL;
-    for (j=0; j<marker.ny; ++j)
-        marker(0,j, 0)=marker(marker.nx-1, j, marker.nz-1)=SOLIDCELL;
-    for (i=0; i<marker.nx; ++i)
-        marker(i,0, 0)=marker(i,marker.ny-1,marker.nz-1)=SOLIDCELL;
+
+    for (i=0; i<marker.nx; ++i){
+        for (j = 0; j<marker.ny; ++j){
+            marker(i,j, 0) = marker(i,j, marker.nz-1) = SOLIDCELL;
+        }
+    }
+
+    for (i=0; i<marker.nx; ++i){
+        for (k=0; k<marker.nz; ++k){
+            marker(i,0,k) = marker(i,marker.ny-1,k) = SOLIDCELL;
+        }
+    }
+
+    for (j=0;j<marker.ny;++j){
+        for (k=0;k<marker.nz;++k){
+            marker(0,j,k)=marker(marker.nx-1,j,k) = SOLIDCELL;
+        }
+    }
+//    // first mark where solid is
+//    for (k=0; k<marker.nz; ++k)
+//        marker(0, 0, k) = marker(marker.nx-1,marker.ny-1 ,k)=SOLIDCELL;
+//    for (j=0; j<marker.ny; ++j)
+//        marker(0,j, 0)=marker(marker.nx-1, j, marker.nz-1)=SOLIDCELL;
+//    for (i=0; i<marker.nx; ++i)
+//        marker(i,0, 0)=marker(i,marker.ny-1,marker.nz-1)=SOLIDCELL;
 
     // now makre sure nothing leaves the domain
     for(k=0; k<w.nz; ++k)
@@ -247,15 +265,10 @@ sweep_u(int i0, int i1, int j0, int j1, int k0, int k1)
             if (dp<0) continue; // not useful on this sweep direction
             dq = 0.5*(phi(i-1,j,k)+phi(i,j,k)-phi(i-1,j-dj,k)-phi(i,j-dj,k));
             dr = 0.5*(phi(i-1,j,k)+phi(i,j,k)-phi(i-1,j,k-dk)-phi(i,j,k-dk));
-            if (dq<0 && dr<0) continue; // not useful on this sweep direction
-            if (dq < 0 || dq > dr){
-                std::swap(dq,dr);
-                d = u(i,j,k-dk);
-            }
-            else d = u(i,j-dj,k);
+            if (dq<0) continue; // not useful on this sweep direction
             if(dp+dq==0) alpha=0.5;
             else alpha=dp/(dp+dq);
-            u(i,j,k)=alpha*u(i-di,j,k)+(1-alpha)*d;
+            u(i,j,k)=alpha*u(i-di,j,k)+(1-alpha)* u(i,j-dj,k);
         }
 }
 
@@ -268,18 +281,12 @@ sweep_v(int i0, int i1, int j0, int j1, int k0, int k1)
         if(marker(i,j-1, k)==AIRCELL && marker(i,j, k)==AIRCELL){
             dq=dj*(phi(i,j, k)-phi(i,j-1,k));
             if(dq<0) continue; // not useful on this sweep direction
-            dp=0.5*(phi(i,j-1,k)+phi(i,j, k)-phi(i-di,j-1, k)-phi(i-di,j, k));
+            dp=0.5*(phi(i,j-1,k)+phi(i,j, k)-phi(i,j-1, k-dk)-phi(i,j, k-dk));
             dr=0.5*(phi(i,j-1,k)+phi(i,j,k)-phi(i,j-1,k-dk)-phi(i,j,k-dk));
-            if(dp<0 && dr<0) continue; // not useful on this sweep direction
-            if (dq < 0 || dq > dr){
-                std::swap(dq,dr);
-                d = v(i,j,k-dk);
-            }
-            else
-                d = v(i-di, j, k);
+            if(dp<0) continue; // not useful on this sweep direction
             if(dp+dq==0) alpha=0.5;
             else alpha=dp/(dp+dq);
-            v(i,j,k)=alpha*d+(1-alpha)*v(i,j-dj,k);
+            v(i,j,k)=alpha*v(i-di, j, k)+(1-alpha)*v(i,j-dj,k);
         }
 }
 
@@ -295,16 +302,10 @@ sweep_w(int i0, int i1, int j0, int j1, int k0, int k1)
             if(dq<0) continue; // not useful on this sweep direction
             dp=0.5*(phi(i,j, k-1)+phi(i,j,k)-phi(i-di,j, k-1)-phi(i-di,j,k));
             dr=0.5*(phi(i,j, k-1)+phi(i,j,k)-phi(i,j-dj, k-1)-phi(i,j-dj,k));
-            if(dp<0 && dr<0) continue; // not useful on this sweep direction
-            if (dq < 0 || dq > dr){
-                std::swap(dq,dr);
-                d = w(i,j-dj,k);
-            }
-            else
-                d = w(i-di, j, k);
+            if(dp<0) continue; // not useful on this sweep direction
             if(dp+dq==0) alpha=0.5;
             else alpha=dp/(dp+dq);
-            w(i,j,k)=alpha*d+(1-alpha)*w(i,j,k-dk);
+            w(i,j,k)=alpha*w(i-di, j, k)+(1-alpha)*w(i,j,k-dk);
         }
 }
 
@@ -504,8 +505,8 @@ solve_pressure(int maxits, double tolerance)
    if(rho==0)
       return;
    for(its=0; its<maxits; ++its){
-      apply_poisson(s, z);
-      double alpha=rho/s.dot(z);
+       apply_poisson(s, z);
+       double alpha=rho/(s.dot(z)+1e-30);
       pressure.increment(alpha, s);
       r.increment(-alpha, z);
       if(r.infnorm()<=tol){
