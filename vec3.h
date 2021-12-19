@@ -33,7 +33,7 @@ struct Vec3
     { v[0]=(T)source[0]; v[1]=(T)source[1]; v[2]=(T)source[2]; }
 
     Vec3(T v0, T v1, T v2)
-    { v[0]=v0; v[1]=v1; v[2] = v[2];}
+    { v[0]=v0; v[1]=v1; v[2] = v2;}
 
     T &operator[](int index)
     {
