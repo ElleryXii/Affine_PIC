@@ -30,7 +30,7 @@ struct Particles{
        sum(grid_.pressure.nx+1, grid_.pressure.ny+1, grid_.pressure.nz+1), simType( simType_ )
    {}
 
-   void add_particle(const Vec3f &px, const Vec3f &pu, const Vec3f &pw);
+   void add_particle(const Vec3f &px, const Vec3f &pu);
    void transfer_to_grid(void);
    void update_from_grid(void);
    void move_particles_in_grid(float dt);
