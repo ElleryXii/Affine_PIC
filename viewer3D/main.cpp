@@ -13,7 +13,7 @@
 
 #include <cstring>
 
-//Simple viewer for liquid simulator data
+//Simple viewer3D for liquid simulator data
 //Hold shift and use the mouse buttons to manipulate the camera
 
 using namespace std;
