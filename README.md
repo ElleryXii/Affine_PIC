@@ -9,12 +9,14 @@ Requires gcc and OpenGL.
 
 # How to Build
 1. Compile the simulator
-   1. Run `make depend` at root folder.
-   2. Run `make` to build. Or use `make_release` to build the release version.
+   1. Edit `Makefile.defs` at the root folder according to your platform.(Linux: comment line 10, uncomment line 11; Mac: comment line 11, uncomment line 10)
+   2. Run `make depend` at root folder.
+   3. Run `make` to build. Or use `make_release` to build the release version.
 2. Compile the renderer
    1. `cd` to `viewer` folder.
-   2. Run `make depend`.
-   3. Run `make` to build
+   2. Comment/uncomment parts of `Makefile.defs` at `viewer` folder per the instruction and your platform.
+   3. Run `make depend`.
+   4. Run `make` to build
 
 # How to Run
 1. Simulator

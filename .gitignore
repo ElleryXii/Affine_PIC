@@ -1,9 +1,11 @@
-**/obj/*
-**/obj_debug/*
+obj/*
+obj_debug/*
+viewer/obj/*
+viewer/obj_debug/*
 out*/*
 .vscode/*
 .idea/*
 flip2d
-viewflip2d/viewflip2d
+viewflip2d/*
 viewer/view
 simulate*
