@@ -19,7 +19,6 @@ add_particle(const Vec3f &px, const Vec3f &pu)
 {
    x.push_back(px);
    u.push_back(pu);
-   /* TODO: initialize the variables you created in particles.h */
    cx.push_back(Vec3f(0.f,0.f,0.f));
    cy.push_back(Vec3f(0.f,0.f,0.f));
    cz.push_back(Vec3f(0.f,0.f,0.f));
@@ -73,7 +72,6 @@ void Particles::
 affineFix(T &accum, Vec3f c, int i, int j, int k, float fx, float fy, float fz)
 {
     float weight;
-   /* TODO: Affine fix */
     weight = (1-fx)*(1-fy)*(1-fz);
     accum(i,j,k) +=  weight * (c[0] * fx + c[1] * fy + c[2] * fz);
 
@@ -112,7 +110,6 @@ transfer_to_grid(void)
       grid.bary_y_centre(x[p][1], j, fy);
       grid.bary_z_centre(x[p][2], k, fz);
       accumulate(grid.u, u[p][0], ui, j, k, ufx, fy, fz);
-      /* TODO: call affineFix to incorporate c_px^n into the grid.u update */
       affineFix(grid.u, cx[p], ui, j, k, ufx, fy, fz);
    }
 
@@ -131,7 +128,6 @@ transfer_to_grid(void)
       grid.bary_y(x[p][1], vj, vfy);
       grid.bary_z_centre(x[p][2], k, fz);
       accumulate(grid.v, u[p][1] , i, vj, k, fx, vfy, fz);
-      /* TODO: call affineFix to incorporate c_py^n into the grid.v update */
       affineFix(grid.v, cy[p], i, vj, k, fx, vfy, fz);
    }
    for(k=0; k<grid.v.nz; ++k){
@@ -149,7 +145,6 @@ transfer_to_grid(void)
       grid.bary_y_centre(x[p][1], j, fy);
       grid.bary_z(x[p][2], wk, wfz);
       accumulate(grid.w, u[p][2] , i, j, wk, fx, fy, wfz);
-      /* TODO: call affineFix to incorporate c_pz^n into the grid.w update */
       affineFix(grid.w, cz[p], i, j, wk, fx, fy, wfz);
    }
    for(k=0; k<grid.w.nz; ++k){

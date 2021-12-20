@@ -18,7 +18,6 @@ struct Particles{
    Grid &grid;
    int np; // number of particles
    std::vector<Vec3f> x, u; // positions and velocities
-   /* TODO: add helper variables */
    std::vector<Vec3f> cx, cy, cz; // c vectors stored, times h
 
    // transfer stuff

@@ -41,7 +41,6 @@ init(float gravity_, int cell_nx, int cell_ny, int cell_nz, float lx_)
    s.init(cell_nx, cell_ny, cell_ny);
 }
 
-//TOTEST
 float Grid::
 CFL(void)
 {
@@ -117,7 +116,6 @@ add_gravity(float dt, bool centered, float cx, float cy, float cz)
 }
 
 // Fast sweeping converges after 2^n iteration, where n is the # of dimensions.
-//TOTEST: # of itr of sweep phi & velocity
 void Grid::
 compute_distance_to_fluid(void)
 {
@@ -133,7 +131,6 @@ extend_velocity(void)
       sweep_velocity();
 }
 
-//TOTEST
 void Grid::
 apply_boundary_conditions(void)
 {
@@ -206,7 +203,6 @@ init_phi(void)
 
 // Eikonal equation, Level set method, approximate signed distance
 // Reference: Fluid Simulation for Computer Graphics 2nd Edition by Robert Bridson, Chapter 4 level set geometry, figure 4.4
-// DONE
 static inline void solve_distance(float phi0, float phi1, float phi2, float &r)
 {
     //sort so that ph0<phi1<phi2
@@ -245,7 +241,6 @@ sweep_phi(void)
     sweep_phi(phi.nx-2, -1, phi.ny-2, -1, phi.nz-2, -1);
 }
 
-//TOTEST: ALL SWEEP FUNCTIONS Choose the closest point, test min/max
 void Grid::
 sweep_u(int i0, int i1, int j0, int j1, int k0, int k1)
 {
@@ -301,7 +296,6 @@ sweep_w(int i0, int i1, int j0, int j1, int k0, int k1)
         }
 }
 
-//TOTEST
 static inline void sweep_velocity_boundary(Array3f& vfield)
 {
     int i, j, k;
@@ -327,7 +321,6 @@ static inline void sweep_velocity_boundary(Array3f& vfield)
     }
 }
 
-//TOTEST: SWEEP
 void Grid::
 sweep_velocity(void)
 {
@@ -365,7 +358,6 @@ sweep_velocity(void)
     sweep_velocity_boundary(w);
 }
 
-//TOTEST
 void Grid::
 find_divergence(void)
 {
@@ -376,7 +368,6 @@ find_divergence(void)
    }
 }
 
-//TOTEST check # of direction; change poisson to Array3x4
 void Grid::
 form_poisson(void)
 {
@@ -411,7 +402,6 @@ form_poisson(void)
    }
 }
 
-//TOTEST
 void Grid::
 apply_poisson(const Array3d &x, Array3d &y)
 {
@@ -431,7 +421,6 @@ apply_poisson(const Array3d &x, Array3d &y)
 }
 
 //Reference: https://www.cs.ubc.ca/~rbridson/fluidsimulation/fluids_notes.pdf
-//TOTEST
 void Grid::
 form_preconditioner()
 {
@@ -452,7 +441,6 @@ form_preconditioner()
     }
 }
 
-//TOTEST
 void Grid::
 apply_preconditioner(const Array3d &x, Array3d &y, Array3d &m)
 {
@@ -483,7 +471,7 @@ apply_preconditioner(const Array3d &x, Array3d &y, Array3d &m)
         }
 }
 
-//TOTEST
+
 void Grid::
 solve_pressure(int maxits, double tolerance)
 {
@@ -515,7 +503,6 @@ solve_pressure(int maxits, double tolerance)
    printf("Didn't converge in pressure solve (its=%d, tol=%g, |r|=%g)\n", its, tol, r.infnorm());
 }
 
-//TOTEST
 void Grid::
 add_gradient(void)
 {

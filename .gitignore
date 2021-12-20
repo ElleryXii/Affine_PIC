@@ -5,4 +5,5 @@ out*/*
 .idea/*
 flip2d
 viewflip2d/viewflip2d
-viewpls3D/fluid3d
+viewer/view
+simulate*

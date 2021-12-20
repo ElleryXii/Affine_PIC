@@ -1,6 +1,6 @@
 # This is for GNU make; other versions of make may not run correctly.
 
-MAIN_PROGRAM = fluid3d
+MAIN_PROGRAM = view
 SRC = main.cpp gluvi.cpp
 
 include Makefile.defs

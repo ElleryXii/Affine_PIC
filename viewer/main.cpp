@@ -40,7 +40,7 @@ bool read_frame(int newframe)
    std::ostringstream strout;
 
    char buffer[100];
-   sprintf(buffer, "frameparticles%04d", newframe);
+   sprintf(buffer, "/frameparticles%04d", newframe);
    strout << file_path << buffer;
    printf("File path %s\n", strout.str().c_str());
    std::ifstream particles_in(strout.str().c_str());
