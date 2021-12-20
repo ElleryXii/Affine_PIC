@@ -1,6 +1,6 @@
 # This is for GNU make; other versions of make may not run correctly.
 
-MAIN_PROGRAM = viewflip2d
+MAIN_PROGRAM = view2d
 SRC = main.cpp gluvi.cpp
 
 include Makefile.defs

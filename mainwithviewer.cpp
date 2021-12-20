@@ -10,7 +10,7 @@
 #include <algorithm>
 #include "particles.h"
 #include "util.h"
-#include "viewflip2d/gluvi.h"
+#include "viewer2D/gluvi.h"
 #include "shared_main.h"
 
 using namespace std;

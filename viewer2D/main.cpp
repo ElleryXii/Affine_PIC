@@ -9,6 +9,7 @@
 #include <cstring>
 #include <iostream>
 #include <fstream>
+#include <string.h>
 #include "gluvi.h"
 #include "vec2.h"
 
@@ -97,13 +98,14 @@ void special_key_handler(int key, int x, int y)
 
 int main(int argc, char **argv)
 {
-   Gluvi::init("viewflip2d", &argc, argv);
+   Gluvi::init("view 2D", &argc, argv);
 
    if(argc!=2){
       cerr<<"Expecting one argument: format for particle filenames"<<endl;
       return 1;
    }
 
+   std::strcat(argv[1],"/frameparticles%04d");
    file_format=argv[1];   
    if(!read_frame(0))
       return 1;

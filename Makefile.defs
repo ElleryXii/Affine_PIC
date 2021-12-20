@@ -7,5 +7,5 @@ DEBUG_FLAGS = -g
 LINK = g++
 LINK_LIBS = -lm
 LINK_LIBS_V = -lm
-#GL_FLAGS = -lm -lobjc -framework OpenGL -framework GLUT # for the Mac
-GL_FLAGS = -lm -lGL -lGLU -lglut # for linux
+GL_FLAGS = -lm -lobjc -framework OpenGL -framework GLUT # for the Mac
+#GL_FLAGS = -lm -lGL -lGLU -lglut # for linux

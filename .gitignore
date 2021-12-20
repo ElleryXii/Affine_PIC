@@ -4,5 +4,6 @@ out*/*
 .vscode/*
 .idea/*
 flip2d
-viewflip2d/viewflip2d
 viewpls3D/*
+simulate*
+viewer2D/view2D
