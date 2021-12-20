@@ -34,6 +34,7 @@ struct Grid{
    Array3d m;
    Array3d r, z, s; //r: divergence
 
+   Array3c u_valid, v_valid, w_valid;
    Grid(void)
    {}
 

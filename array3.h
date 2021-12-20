@@ -12,6 +12,9 @@
 #include <cstdio>
 #include <cmath>
 #include <cstring>
+#include <tuple>
+
+typedef std::tuple<int,int,int> Index;
 
 template<class T>
 struct Array3{
@@ -74,6 +77,18 @@ struct Array3{
     void zero()
     { std::memset(data, 0, size*sizeof(T)); }
 
+    void assign(T val)
+    { std::memset(data, val, size*sizeof(T)); }
+
+    void get_neighbours(int i, int j, int k, std::vector<Index> &nbs){
+        nbs.clear();
+        if (i-1>=0) nbs.emplace_back(i-1,j,k);
+        if (i+1<nx) nbs.emplace_back(i+1,j,k);
+        if (j-1>=0) nbs.emplace_back(i,j-1,k);
+        if (j+1<ny) nbs.emplace_back(i,j+1,k);
+        if (k-1>=0) nbs.emplace_back(i,j,k-1);
+        if (k+1<nz) nbs.emplace_back(i,j,k+1);
+    }
 
     double dot(const Array3 &a) const
     {
@@ -98,6 +113,18 @@ struct Array3{
         return false;
     }
 
+    void print() const{
+        for (int i = 0; i<nx; ++i){
+            for (int j =0; j<ny; ++j){
+                for(int k=0;k<nz; ++k)
+                    std::cout<<(*this)(i,j,k)<<" ";
+                std::cout<<" |  ";
+            }
+            std::cout<<"\n";
+        }
+        std::cout<<"========="<<std::endl;
+    }
+
     void write_matlab(FILE *fp, const char *variable_name)
     {
         fprintf(fp, "%s=[", variable_name);
@@ -117,6 +144,7 @@ struct Array3{
 typedef Array3<float> Array3f;
 typedef Array3<double> Array3d;
 typedef Array3<char> Array3c;
+typedef Array3<int> Array3i;
 
 template<class T>
 struct Array3x4{
