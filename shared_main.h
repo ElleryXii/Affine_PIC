@@ -13,7 +13,10 @@
 #define SIMULATION_TYPE (APIC) // default simtype: APIC, FLIP, or PIC
 #define INIT_DROP_RADIUS (0.05)
 #define INIT_FLOOR_SIZE (0.05)
-#define USE_SPHERICAL_GRAV (false) //not implemented for 3d
+#define INIT_NA (3)
+#define INIT_NB (3)
+#define INIT_NC (3)
+#define USE_SPHERICAL_GRAV (true) //not implemented for 3d
 // the following only matter when USE_SPHERICAL_GRAV is true
 #define INIT_VEL_MAGNITUDE (0.55)
 #define GRAV_CENTER_X (0.5)

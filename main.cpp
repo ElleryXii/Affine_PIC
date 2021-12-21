@@ -42,7 +42,7 @@ int main(int argc, char **argv)
    }
    Particles particles(grid, sType);
 
-   init_water_drop(grid, particles, 4, 4, 4);
+   init_water_drop(grid, particles, INIT_NA, INIT_NB, INIT_NC);
    particles.write_to_file("%s/frameparticles%04d", outputpath.c_str(), 0);
 
    for(int i=1; i<N_ITER + 1; ++i){

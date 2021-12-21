@@ -49,7 +49,7 @@ init(float gravity_, int cell_nx, int cell_ny, int cell_nz, float lx_)
 float Grid::
 CFL(void)
 {
-   float maxv2=max(h*gravity, sqr(u.infnorm())+sqr(v.infnorm())+ sqrt(w.infnorm()));
+   float maxv2=max(h*gravity, sqr(u.infnorm())+sqr(v.infnorm())+ sqr(w.infnorm()));
    if(maxv2<1e-16) maxv2=1e-16;
    return h/sqrt(maxv2);
 }
@@ -69,55 +69,85 @@ void Grid::
 add_gravity(float dt, bool centered, float cx, float cy, float cz)
 {
    float dtg=dt*gravity;
-   /*center
+//   /*center
    if( centered )
    {
       for(int i = 0; i < u.nx; ++i)
       {
          for( int j = 0; j < v.ny; ++j)
          {
-            float x, y, dx, dy, dr2, dr;
-            if ( j < u.ny)
-            {
-               x = ( i ) * h;
-               y = ( 0.5 + j ) * h;
-               dx = x - cx;
-               dy = y - cy;
-               dr2 = dx * dx + dy * dy;
-               if (dr2 < 0.0001 * h * h){
-                  printf("dr2 too small: %f \n", dr2);
-                  dr2 = 0.0001 * h * h;
-               }
-               dr = sqrt(dr2);
-               dx /= dr;
-               dy /= dr;
-               u(i,j) -= dtg * dx / dr2;
-            }
-            if( i < v.nx )
-            {
-               x = ( 0.5 + i ) * h;
-               y = ( j ) * h;
-               dx = x - cx;
-               dy = y - cy;
-               dr2 = dx * dx + dy * dy;
-               if (dr2 < 0.0001 * h * h){
-                  printf("dr2 too small: %f \n", dr2);
-                  dr2 = 0.0001 * h * h;
-               }
-               dr = sqrt(dr2);
-               dx /= dr;
-               dy /= dr;
-               v(i,j) -= dtg * dy / dr2;
-            }
+             for (int k =0; k<w.nz; ++k){
+                 float x, y,z, dx, dy, dz, dr2, dr;
+                 if ( j < u.ny && k<u.nz)
+                 {
+                     x = ( i ) * h;
+                     y = ( 0.5 + j ) * h;
+                     z = (0.5+ k)*h;
+                     dx = x - cx;
+                     dy = y - cy;
+                     dz = z - cz;
+                     dr2 = dx * dx + dy * dy +dz*dz;
+                     if (dr2 < 0.0001 * h * h){
+                         printf("dr2 too small: %f \n", dr2);
+                         dr2 = 0.0001 * h * h;
+                     }
+                     dr = sqrt(dr2);
+                     dx /= dr;
+                     dy /= dr;
+                     dz /= dr;
+                     u(i,j, k) -= dtg * dx / dr2;
+                 }
+                 if( i < v.nx && k<v.nz )
+                 {
+                     x = ( 0.5 + i ) * h;
+                     y = ( j ) * h;
+                     z = (0.5+ k)*h;
+                     dx = x - cx;
+                     dy = y - cy;
+                     dz = z - cz;
+                     dr2 = dx * dx + dy * dy +dz*dz;
+                     if (dr2 < 0.0001 * h * h){
+                         printf("dr2 too small: %f \n", dr2);
+                         dr2 = 0.0001 * h * h;
+                     }
+                     dr = sqrt(dr2);
+                     dx /= dr;
+                     dy /= dr;
+                     dz /=dr;
+                     v(i,j,k) -= dtg * dy / dr2;
+                 }
+
+                 if( i <w.nx && j<w.ny)
+                 {
+                     x = ( 0.5 + i ) * h;
+                     y = ( 0.5+ j ) * h;
+                     z = ( k)*h;
+                     dx = x - cx;
+                     dy = y - cy;
+                     dz = z - cz;
+                     dr2 = dx * dx + dy * dy +dz*dz;
+                     if (dr2 < 0.0001 * h * h){
+                         printf("dr2 too small: %f \n", dr2);
+                         dr2 = 0.0001 * h * h;
+                     }
+                     dr = sqrt(dr2);
+                     dx /= dr;
+                     dy /= dr;
+                     dz /=dr;
+                     w(i,j,k) -= dtg * dz / dr2;
+                 }
+
+             }
+
          }
       }
    }
-    */
-//   else
-//   {
+//    */
+   else
+   {
       for(int i=0; i<v.size; ++i)
          v.data[i]-=dtg;
-//   }
+   }
 }
 
 // Fast sweeping converges after 2^n iteration, where n is the # of dimensions.
