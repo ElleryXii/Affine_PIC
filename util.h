@@ -46,11 +46,11 @@ inline T max(const T &a1, const T &a2, const T &a3)
 { if(a1>a2) return max(a1,a3); else return max(a2,a3); }
 
 template<class T>
-inline T clamp(T a, T lower, T upper)
+inline void clamp(T& a, T lower, T upper)
 {
-   if(a<lower) return lower;
-   else if(a>upper) return upper;
-   else return a;
+   if (a<lower) a = lower;
+   else if(a>upper) a = upper;
+//   else return a;
 }
 
 /*
