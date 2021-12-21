@@ -352,15 +352,15 @@ Gluvi::Target3D* cam_local;
 int main(int argc, char **argv)
 {
 
-   Gluvi::init("Liquid Data Viewer", &argc, argv);
 
    if(argc!=2){
       cerr<<"Expecting path to simulation data folder"<<endl;
       return 1;
    }
 
+    Gluvi::init(argv[1], &argc, argv);
 
-   file_path=argv[1];   
+    file_path=argv[1];
 
    //read grid dimensions
    char buffer[100];

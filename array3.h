@@ -12,9 +12,9 @@
 #include <cstdio>
 #include <cmath>
 #include <cstring>
-#include <tuple>
+//#include <tuple>
 
-typedef std::tuple<int,int,int> Index;
+//typedef std::tuple<int,int,int> Index;
 
 template<class T>
 struct Array3{
@@ -79,16 +79,16 @@ struct Array3{
 
     void assign(T val)
     { std::memset(data, val, size*sizeof(T)); }
-
-    void get_neighbours(int i, int j, int k, std::vector<Index> &nbs){
-        nbs.clear();
-        if (i-1>=0) nbs.emplace_back(i-1,j,k);
-        if (i+1<nx) nbs.emplace_back(i+1,j,k);
-        if (j-1>=0) nbs.emplace_back(i,j-1,k);
-        if (j+1<ny) nbs.emplace_back(i,j+1,k);
-        if (k-1>=0) nbs.emplace_back(i,j,k-1);
-        if (k+1<nz) nbs.emplace_back(i,j,k+1);
-    }
+//
+//    void get_neighbours(int i, int j, int k, std::vector<Index> &nbs){
+//        nbs.clear();
+//        if (i-1>=0) nbs.emplace_back(i-1,j,k);
+//        if (i+1<nx) nbs.emplace_back(i+1,j,k);
+//        if (j-1>=0) nbs.emplace_back(i,j-1,k);
+//        if (j+1<ny) nbs.emplace_back(i,j+1,k);
+//        if (k-1>=0) nbs.emplace_back(i,j,k-1);
+//        if (k+1<nz) nbs.emplace_back(i,j,k+1);
+//    }
 
     double dot(const Array3 &a) const
     {

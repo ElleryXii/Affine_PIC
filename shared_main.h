@@ -13,9 +13,9 @@
 #define SIMULATION_TYPE (APIC) // default simtype: APIC, FLIP, or PIC
 #define INIT_DROP_RADIUS (0.05)
 #define INIT_FLOOR_SIZE (0.05)
-#define INIT_NA (3)
-#define INIT_NB (3)
-#define INIT_NC (3)
+#define INIT_NA (4)
+#define INIT_NB (4)
+#define INIT_NC (4)
 #define USE_SPHERICAL_GRAV (true) //not implemented for 3d
 // the following only matter when USE_SPHERICAL_GRAV is true
 #define INIT_VEL_MAGNITUDE (0.55)
@@ -24,18 +24,21 @@
 #define GRAV_CENTER_Z (0.5)
 #define GRAV_FACTOR (0.01)
 
+#define N_ITER (100)
+
 using namespace std;
 /* This sets the signed distance function phi of the fluid. You can selectively uncomment a line to decide */
 /* which example to run. This is used in initializing the water. */
 float fluidphi(Grid &grid, float x, float y, float z)
 {
-//   return y-0.5*grid.ly; // no drop
+//   return y-0.05*grid.ly; // no drop
 //   return min(sqrt(sqr(x-0.5*grid.lx)+sqr(y-0.625*grid.ly)+sqr(z-0.5*grid.lz))-0.02*grid.ly, y-0.6*grid.ly); // tiny drop
 //   return min(sqrt(sqr(x-0.3333*grid.lx)+sqr(y-0.71*grid.ly)+sqr(z-0.3333*grid.lz))-0.3*grid.ly, y-0.2*grid.ly); // large drop
 //   return max(y-0.8*grid.ly, -sqrt(sqr(x-0.5*grid.lx)+sqr(y-0.2*grid.ly)+sqr(z-0.5*grid.lz))+0.1*grid.lx); // bubble
    //return sqrt(sqr(x-0.5*grid.lx)+sqr(y-0.75*grid.ly))-0.15*grid.lx; // large drop without bottom
    return min(y-INIT_FLOOR_SIZE*grid.ly, sqrt(sqr(x-0.5*grid.lx)+sqr(y-0.7*grid.ly)+sqr(z-0.5*grid.lz))-INIT_DROP_RADIUS*grid.lx); // medium drop
-   //return 0.75*grid.lx-x; // vertical column
+//    return 0.95*grid.ly-y;; // horizontal
+//    return 0.95*grid.lx-x; // vertical column
 //   return max( max(x-0.75*grid.lx, 0.25*grid.lx-x), max(y-0.75*grid.ly, 0.25*grid.ly-y), max(z-0.75*grid.lz, 0.25*grid.lz-z)); // small box
 }
 
@@ -70,12 +73,12 @@ void init_water_drop(Grid &grid, Particles &particles, int na, int nb, int nc)
                           x=(i+(a+0.1+0.8*rand()/(double)RAND_MAX)/na)*grid.h;
                           y=(j+(b+0.1+0.8*rand()/(double)RAND_MAX)/nb)*grid.h;
                           z=(k+(c+0.1+0.8*rand()/(double)RAND_MAX)/nc)*grid.h;
-//                          if( USE_SPHERICAL_GRAV )
-//                          {
-//                              vx = INIT_VEL_MAGNITUDE * grid.lx * (rand() * 2.0 / (double)RAND_MAX + 0.5 );
-//                              vy = INIT_VEL_MAGNITUDE * grid.ly * (rand() * 2.0 / (double)RAND_MAX - 1.0 );
-//                              vz = INIT_VEL_MAGNITUDE * grid.ly * (rand() * 2.0 / (double)RAND_MAX - 1.0 );
-//                          }
+                          if( USE_SPHERICAL_GRAV )
+                          {
+                              vx = INIT_VEL_MAGNITUDE * grid.lx * (rand() * 2.0 / (double)RAND_MAX + 0.5 );
+                              vy = INIT_VEL_MAGNITUDE * grid.ly * (rand() * 2.0 / (double)RAND_MAX - 1.0 );
+                              vz = INIT_VEL_MAGNITUDE * grid.lz * (rand() * 2.0 / (double)RAND_MAX - 1.0 );
+                          }
                           phi=fluidphi(grid, x, y, z);
                           if(phi>-0.25*grid.h/na)
                               continue;

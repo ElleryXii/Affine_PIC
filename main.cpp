@@ -12,7 +12,6 @@
 #include "util.h"
 #include "shared_main.h"
 
-#define N_ITER (100)
 using namespace std;
 
 

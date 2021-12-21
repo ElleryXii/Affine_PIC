@@ -1,7 +1,7 @@
 # local machine settings (change according to your system)
 
 DEPEND = g++
-CC = g++ -Wall -std=c++11
+CC = g++ -Wall
 RELEASE_FLAGS = -O3 -DNDEBUG
 DEBUG_FLAGS = -g
 LINK = g++

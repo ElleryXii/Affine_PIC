@@ -162,7 +162,7 @@ compute_distance_to_fluid(void)
 void Grid::
 extend_velocity(void)
 {
-//   for(int i=0; i<4; ++i)
+   for(int i=0; i<4; ++i)
       sweep_velocity();
 }
 
@@ -362,8 +362,8 @@ static void extrapolate(Array3f& grid, Array3c& valid) {
     for(int layers = 0; layers < 10; ++layers) {
         valid.copy_to(cache_valid);
         for(int k = 1; k < grid.nz-1; ++k) for(int j = 1; j < grid.ny-1; ++j) for(int i = 1; i < grid.nx-1; ++i) {
-                    float sum = 0, count = 0;
                     if (cache_valid(i,j,k)) continue;
+                    float sum = 0, count = 0;
 
                     if(cache_valid(i+1,j,k)) {
                         sum += grid(i+1,j,k);
@@ -408,43 +408,40 @@ sweep_velocity(void)
     extrapolate(u, u_valid);
     extrapolate(v,v_valid);
     extrapolate(w,w_valid);
+
+////     sweep u, only into the air
+//    sweep_u(1, u.nx-1, 1, u.ny-1, 1, u.nz-1);
+//    sweep_u(1, u.nx-1, 1, u.ny-1, u.nz-2, 0);
+//    sweep_u(1, u.nx-1, u.ny-2, 0, 1, u.nz-1);
+//    sweep_u(1, u.nx-1, u.ny-2, 0, u.nz-2, 0);
+//    sweep_u(u.nx-2, 0, 1, u.ny-1, 1, u.nz-1);
+//    sweep_u(u.nx-2, 0, 1, u.ny-1, u.nz-2, 0);
+//    sweep_u(u.nx-2, 0, u.ny-2, 0, 1, u.nz-1);
+//    sweep_u(u.nx-2, 0, u.ny-2, 0, u.nz-2, 0);
 //    sweep_velocity_boundary(u);
+//
+//    // now the same for v
+//    sweep_v(1, v.nx-1, 1, v.ny-1, 1, v.nz-1);
+//    sweep_v(1, v.nx-1, 1, v.ny-1, v.nz-2, 0);
+//    sweep_v(1, v.nx-1, v.ny-2, 0, 1, v.nz-1);
+//    sweep_v(1, v.nx-1, v.ny-2, 0, v.nz-2, 0);
+//    sweep_v(v.nx-2, 0, 1, v.ny-1, 1, v.nz-1);
+//    sweep_v(v.nx-2, 0, 1, v.ny-1, v.nz-2, 0);
+//    sweep_v(v.nx-2, 0, v.ny-2, 0, 1, v.nz-1);
+//    sweep_v(v.nx-2, 0, v.ny-2, 0, v.nz-2, 0);
 //    sweep_velocity_boundary(v);
+//
+//    // for w
+//    sweep_w(1, w.nx-1, 1, w.ny-1, 1, w.nz-1);
+//    sweep_w(1, w.nx-1, 1, w.ny-1, w.nz-2, 0);
+//    sweep_w(1, w.nx-1, w.ny-2, 0, 1, w.nz-1);
+//    sweep_w(1, w.nx-1, w.ny-2, 0, w.nz-2, 0);
+//    sweep_w(w.nx-2, 0, 1, w.ny-1, 1, w.nz-1);
+//    sweep_w(w.nx-2, 0, 1, w.ny-1, w.nz-2, 0);
+//    sweep_w(w.nx-2, 0, w.ny-2, 0, 1, w.nz-1);
+//    sweep_w(w.nx-2, 0, w.ny-2, 0, w.nz-2, 0);
 //    sweep_velocity_boundary(w);
-    return;
 
-//     sweep u, only into the air
-    sweep_u(1, u.nx-1, 1, u.ny-1, 1, u.nz-1);
-    sweep_u(1, u.nx-1, 1, u.ny-1, u.nz-2, 0);
-    sweep_u(1, u.nx-1, u.ny-2, 0, 1, u.nz-1);
-    sweep_u(1, u.nx-1, u.ny-2, 0, u.nz-2, 0);
-    sweep_u(u.nx-2, 0, 1, u.ny-1, 1, u.nz-1);
-    sweep_u(u.nx-2, 0, 1, u.ny-1, u.nz-2, 0);
-    sweep_u(u.nx-2, 0, u.ny-2, 0, 1, u.nz-1);
-    sweep_u(u.nx-2, 0, u.ny-2, 0, u.nz-2, 0);
-    sweep_velocity_boundary(u);
-
-    // now the same for v
-    sweep_v(1, v.nx-1, 1, v.ny-1, 1, v.nz-1);
-    sweep_v(1, v.nx-1, 1, v.ny-1, v.nz-2, 0);
-    sweep_v(1, v.nx-1, v.ny-2, 0, 1, v.nz-1);
-    sweep_v(1, v.nx-1, v.ny-2, 0, v.nz-2, 0);
-    sweep_v(v.nx-2, 0, 1, v.ny-1, 1, v.nz-1);
-    sweep_v(v.nx-2, 0, 1, v.ny-1, v.nz-2, 0);
-    sweep_v(v.nx-2, 0, v.ny-2, 0, 1, v.nz-1);
-    sweep_v(v.nx-2, 0, v.ny-2, 0, v.nz-2, 0);
-    sweep_velocity_boundary(v);
-
-    // for w
-    sweep_w(1, w.nx-1, 1, w.ny-1, 1, w.nz-1);
-    sweep_w(1, w.nx-1, 1, w.ny-1, w.nz-2, 0);
-    sweep_w(1, w.nx-1, w.ny-2, 0, 1, w.nz-1);
-    sweep_w(1, w.nx-1, w.ny-2, 0, w.nz-2, 0);
-    sweep_w(w.nx-2, 0, 1, w.ny-1, 1, w.nz-1);
-    sweep_w(w.nx-2, 0, 1, w.ny-1, w.nz-2, 0);
-    sweep_w(w.nx-2, 0, w.ny-2, 0, 1, w.nz-1);
-    sweep_w(w.nx-2, 0, w.ny-2, 0, w.nz-2, 0);
-    sweep_velocity_boundary(w);
 }
 
 void Grid::
@@ -576,7 +573,7 @@ solve_pressure(int maxits, double tolerance)
       return;
    for(its=0; its<maxits; ++its){
        apply_poisson(s, z);
-       double alpha=rho/(s.dot(z)+1e-30);
+       double alpha=rho/s.dot(z);
       pressure.increment(alpha, s);
       r.increment(-alpha, z);
       if(r.infnorm()<=tol){
@@ -585,7 +582,7 @@ solve_pressure(int maxits, double tolerance)
       }
       apply_preconditioner(r, z, m);
       double rhonew=z.dot(r);
-      double beta=rhonew/(rho+1e-30);
+      double beta=rhonew/rho;
       s.scale_and_increment(beta, z);
       rho=rhonew;
    }
@@ -620,14 +617,14 @@ add_gradient(void)
         }
     }
 
-//    for(unsigned int i = 0; i < u_valid.size; ++i)
-//        if(u_valid.data[i] == 0)
-//            u.data[i] = 0;
-//    for(unsigned int i = 0; i < v_valid.size; ++i)
-//        if(v_valid.data[i] == 0)
-//            v.data[i] = 0;
-//    for(unsigned int i = 0; i < w_valid.size; ++i)
-//        if(w_valid.data[i] == 0)
-//            w.data[i] = 0;
+    for(unsigned int i = 0; i < u_valid.size; ++i)
+        if(u_valid.data[i] == 0)
+            u.data[i] = 0;
+    for(unsigned int i = 0; i < v_valid.size; ++i)
+        if(v_valid.data[i] == 0)
+            v.data[i] = 0;
+    for(unsigned int i = 0; i < w_valid.size; ++i)
+        if(w_valid.data[i] == 0)
+            w.data[i] = 0;
 }
 
